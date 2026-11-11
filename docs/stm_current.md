@@ -145,3 +145,10 @@ exhaustion. Whole-repository Black/Ruff/mypy checks passed. A live read-only
 `crawler.py --keyword "AI 副业" --limit 3 --dry-run` returned exactly three items,
 three sellers and an average price of 1.19; no history documents were changed.
 Feature commit `fb9ea8a` was pushed to origin/main and verified with ls-remote.
+
+## Usage Documentation Follow-up
+
+- [x] Add a visible input walkthrough, copyable examples and input troubleshooting to README and Windows usage guides
+- [x] Align deployment, VPS and Docker instructions with configurable keyword/item limits and unattended defaults
+- [ ] Check documented options against both CLI help screens, review document links/diffs, and commit the documentation update
+- [ ] Push the documentation update and verify origin/main

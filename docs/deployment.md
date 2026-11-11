@@ -33,8 +33,26 @@ The local renderer's headless Chromium lives in `.browsers/`.
 
 1. Open `login.bat` and manually sign in to Xianyu, completing any verification.
 2. After search items appear, close the entire dedicated Chrome login window.
-3. Double-click `run.bat` to crawl, save documents, analyze and render.
-4. Open the newest folder in `output/`; open its `抓取数据.txt` to read the counts.
+3. Double-click `run.bat`. Enter keywords separated by Chinese or English commas,
+   then a positive integer maximum item count per keyword. Press Enter after each.
+4. Wait for `=== Done ===` and `Exit code: 0`. Open the newest folder in `output/`;
+   open its `抓取数据.txt` to read the counts.
+
+For example, entering `AI 副业，Sora 教程` and `100` requests up to 100 unique
+items for each keyword, at most 200 keyword-item observations in total. Spaces
+inside a keyword are preserved; duplicate keywords are crawled once. Invalid
+interactive input is retried. Choices apply to the current run and are not saved.
+
+To supply both settings without prompts:
+
+```powershell
+.\run.bat --keyword 'AI 副业' --keyword 'Sora 教程' --limit 100
+```
+
+Repeat `--keyword` for multiple keywords on the command line. `run.bat` prompts
+only for missing keywords or limit. A direct Python invocation prompts only when
+`--interactive` is supplied. See the [Chinese usage guide](../使用手册.txt) for the
+complete input walkthrough and troubleshooting.
 
 For a single-keyword check that does not save data:
 
@@ -42,7 +60,7 @@ For a single-keyword check that does not save data:
 Set-Location D:\ai-index
 $env:PLAYWRIGHT_BROWSERS_PATH = 'D:\ai-index\.browsers'
 $env:PYTHONUTF8 = '1'
-.\.venv\Scripts\python.exe -X utf8 crawler.py --keyword 'AI 副业' --dry-run
+.\.venv\Scripts\python.exe -X utf8 crawler.py --keyword 'AI 副业' --limit 100 --dry-run
 ```
 
 Run `smoke-test.bat` for renderer checks without crawling. Every invocation creates
@@ -57,8 +75,15 @@ access restrictions. The site can require manual login again at any time.
 The crawler observes ordinary search responses and clicks the actual pagination
 controls. It matches the exact search endpoint, ignores similarly named shade
 requests, and observes site-initiated retries. No captcha solving is provided.
-Counts are a deduplicated sample of at most two pages per keyword, not total market
-size. Keyword samples can overlap with one another.
+With `--limit`, counts are capped at that number of unique items per keyword.
+Pagination continues beyond two pages if needed and stops at the limit or a
+confirmed search end. Sellers and average price use only the retained sample.
+An exhausted search logs its actual count; failed pagination still aborts the
+batch. These counts are samples, not total market size, and keyword samples can
+overlap. Keep the same limits across dates when comparing trends.
+
+Each run analyzes only its own keywords. Daily history merges records by keyword,
+preserving other same-date keywords, while the run folder stores only that batch.
 
 ## Failure Handling
 
@@ -92,6 +117,19 @@ and Chinese fonts. The existing `deploy/vps/`, `deploy/systemd/` and
 `deploy/docker/` deployment assets still apply. Keep `data/` and `output/` writable;
 Docker bind mounts must retain both. The host owns scheduling and logs. A usable
 Xianyu session remains necessary; unattended cloud access is not guaranteed.
+
+Scheduled jobs should pass their sampling settings directly, without
+`--interactive`. From the repository root, for example:
+
+```bash
+.venv/bin/python3 run_daily.py --keyword 'AI 副业' --keyword 'Sora 教程' --limit 100
+```
+
+Without `--keyword`, Python entry points use the eight keywords in `config.py`;
+without `--limit`, they retain the two-page sampling default. This also applies
+to the existing systemd and Docker templates. The interactive Windows launcher
+always asks for missing settings. See the [VPS guide](../deploy/vps/README.md)
+and [Docker guide](../deploy/docker/README.md) for scheduled command examples.
 
 GitHub Actions runs formatting/lint/type checks, regression tests and sample
 rendering; it does not attempt authenticated live crawling. Local history,

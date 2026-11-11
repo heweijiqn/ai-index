@@ -74,6 +74,32 @@ sudo -u ai-shovel -- sh -lc 'cd /opt/ai-shovel-index/deploy/docker && docker com
 sudo -u ai-shovel -- sh -lc 'cd /opt/ai-shovel-index/deploy/docker && docker compose --env-file .env run --rm ai-shovel-index'
 ```
 
+To choose keywords and a per-keyword item limit for a single run, execute this
+from `/opt/ai-shovel-index/deploy/docker` as the deployment user:
+
+```bash
+docker compose --env-file .env run --rm ai-shovel-index python run_daily.py --keyword 'AI 副业' --keyword 'Sora 教程' --limit 100
+```
+
+The command uses the Python runtime installed in the image. `100` is the maximum
+number of unique items for each keyword, at most 200 keyword-item observations in
+this example. Searches with fewer results log their actual counts. Repeat
+`--keyword` for multiple keywords; quote keywords containing spaces.
+
+For scheduled runs, set the `ai-shovel-index` service's `command` in your deployed
+`compose.yml` to:
+
+```yaml
+command: ["python", "run_daily.py", "--keyword", "AI 副业", "--keyword", "Sora 教程", "--limit", "100"]
+```
+
+Keep this deployment setting when updating the checkout. Without explicit
+sampling arguments, the existing Compose command uses the eight configured
+keywords and at most two pages per keyword. Scheduled containers should receive
+all settings as arguments, without `--interactive`. Keep limits consistent across
+dates when comparing trends. Live crawling requires a usable Xianyu session;
+the smoke service checks rendering without logging in or crawling.
+
 Check output and logs:
 
 ```bash

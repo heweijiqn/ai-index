@@ -59,8 +59,26 @@ Run these before enabling the timer:
 
 ```bash
 sudo -u ai-shovel -- /opt/ai-shovel-index/.venv/bin/python3 /opt/ai-shovel-index/smoke_test.py
-sudo -u ai-shovel -- /opt/ai-shovel-index/.venv/bin/python3 /opt/ai-shovel-index/run_daily.py --date 2026-03-06
+sudo -u ai-shovel -- /opt/ai-shovel-index/.venv/bin/python3 /opt/ai-shovel-index/run_daily.py --keyword 'AI 副业' --keyword 'Sora 教程' --limit 100
 ```
+
+`--limit 100` means up to 100 unique items per keyword. Repeat `--keyword` for
+multiple keywords; spaces inside the quoted keyword are retained. Searches with
+fewer results log the actual count. Add `--date YYYY-MM-DD` only to choose a
+record date; it still crawls current search results.
+
+To use the same settings for scheduled runs, update `ExecStart` in the installed
+`/etc/systemd/system/ai-shovel-index.service` before enabling the timer:
+
+```ini
+ExecStart=/opt/ai-shovel-index/.venv/bin/python3 /opt/ai-shovel-index/run_daily.py --keyword "AI 副业" --keyword "Sora 教程" --limit 100
+```
+
+Then run `sudo systemctl daemon-reload`. Do not add `--interactive` to a scheduled
+service. The unchanged service template uses the eight configured keywords and
+at most two pages per keyword, with no input prompts. Keep limits consistent
+across dates to make the sampling comparable. Live crawling requires a usable
+Xianyu session; the smoke test checks rendering without logging in or crawling.
 
 Check logs:
 
