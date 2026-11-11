@@ -36,6 +36,7 @@ from config import (
     CrawlRecord,
     utc_today_str,
 )
+from crawl_options import add_crawl_arguments
 from storage import save_records
 
 logger = logging.getLogger(__name__)
@@ -156,7 +157,7 @@ def _is_search_response(url: str) -> bool:
 
 
 async def _fetch_keyword_async(
-    keyword: str, context: BrowserContext, target_date: str
+    keyword: str, context: BrowserContext, target_date: str, limit: int | None = None
 ) -> CrawlRecord:
     """Observe requests made by the normal page, then click its next-page button."""
     page = await context.new_page()
@@ -185,15 +186,25 @@ async def _fetch_keyword_async(
             wait_until="domcontentloaded",
             timeout=CRAWL_TIMEOUT_MS,
         )
-        for page_num in range(1, CRAWL_PAGES + 1):
+        page_num = 0
+        seen: set[str] = set()
+        while True:
+            page_num += 1
             items = await _wait_for_search(page, queue)
             logger.info("Keyword '%s', page %d: %d items", keyword, page_num, len(items))
             if not items:
                 break
-            if collected and {i["item_id"] for i in items} <= {i["item_id"] for i in collected}:
+            new_items = []
+            for item in items:
+                if item["item_id"] not in seen:
+                    seen.add(item["item_id"])
+                    new_items.append(item)
+            if not new_items:
                 raise CrawlError("翻页后仍是同一批商品，停止抓取以避免重复计数。")
-            collected.extend(items)
-            if page_num == CRAWL_PAGES:
+            collected.extend(new_items if limit is None else new_items[: limit - len(collected)])
+            if limit is not None and len(collected) >= limit:
+                break
+            if limit is None and page_num == CRAWL_PAGES:
                 break
             next_button = page.locator("button[class*='search-pagination-arrow-container']").last
             await next_button.wait_for(state="visible", timeout=5000)
@@ -210,6 +221,13 @@ async def _fetch_keyword_async(
     finally:
         page.remove_listener("response", on_response)
         await page.close()
+    if limit is not None and len(collected) < limit:
+        logger.warning(
+            "关键词 '%s' 搜索结果已结束：目标 %d 条，实际 %d 条去重商品。",
+            keyword,
+            limit,
+            len(collected),
+        )
     return _aggregate_items(collected, keyword, target_date)
 
 
@@ -257,7 +275,7 @@ def login() -> None:
 
 
 async def _crawl_all_async(
-    target_date: str, keywords: list[str] | None = None
+    target_date: str, keywords: list[str] | None = None, limit: int | None = None
 ) -> list[CrawlRecord]:
     records: list[CrawlRecord] = []
     async with async_playwright() as playwright:
@@ -266,25 +284,31 @@ async def _crawl_all_async(
             for index, keyword in enumerate(KEYWORDS if keywords is None else keywords):
                 if index:
                     await asyncio.sleep(random.uniform(CRAWL_DELAY_MIN, CRAWL_DELAY_MAX))
-                records.append(await _fetch_keyword_async(keyword, context, target_date))
+                records.append(await _fetch_keyword_async(keyword, context, target_date, limit))
         finally:
             await context.close()
     return records
 
 
 def crawl_all(
-    target_date: str | None = None, keywords: list[str] | None = None
+    target_date: str | None = None, keywords: list[str] | None = None, limit: int | None = None
 ) -> list[CrawlRecord]:
     """Return a complete batch or raise before the caller can persist partial data."""
-    return asyncio.run(_crawl_all_async(target_date or utc_today_str(), keywords))
+    if limit is not None and (type(limit) is not int or limit <= 0):
+        raise ValueError("抓取数量必须是大于 0 的整数。")
+    if keywords is not None:
+        if not keywords or any(not keyword.strip() for keyword in keywords):
+            raise ValueError("关键词不能为空。")
+        keywords = list(dict.fromkeys(keyword.strip() for keyword in keywords))
+    return asyncio.run(_crawl_all_async(target_date or utc_today_str(), keywords, limit))
 
 
 def _build_arg_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Crawl Xianyu with a reusable login session.")
     parser.add_argument("--login", action="store_true", help="Open browser for manual login.")
-    parser.add_argument("--keyword", help="Crawl a single keyword.")
+    add_crawl_arguments(parser)
     parser.add_argument("--date", help="Record date YYYY-MM-DD; defaults to UTC today.")
-    parser.add_argument("--dry-run", action="store_true", help="Print without writing to DB.")
+    parser.add_argument("--dry-run", action="store_true", help="只显示结果，不保存数据文档。")
     return parser
 
 
@@ -295,7 +319,7 @@ if __name__ == "__main__":
         if args.login:
             login()
         else:
-            records = crawl_all(args.date, [args.keyword] if args.keyword else None)
+            records = crawl_all(args.date, args.keyword, args.limit)
             if args.dry_run:
                 for record in records:
                     print(

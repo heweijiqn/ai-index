@@ -234,14 +234,18 @@ def compute_index(records: list[CrawlRecord], today: str) -> AnalysisResult:
 # ---------------------------------------------------------------------------
 
 
-def analyze(target_date: str) -> AnalysisResult:
+def analyze(target_date: str, keywords: list[str] | None = None) -> AnalysisResult:
     """Load records and compute the index for target_date in one call.
 
     Args:
         target_date: Date string "YYYY-MM-DD".
+        keywords: Optional batch keyword filter applied to both today and history.
 
     Returns:
         AnalysisResult dict.
     """
     records = get_records(target_date)
+    if keywords is not None:
+        selected = set(keywords)
+        records = [record for record in records if record["keyword"] in selected]
     return compute_index(records, target_date)

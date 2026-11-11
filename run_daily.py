@@ -21,6 +21,7 @@ from config import (
     utc_today_str,
     validate_runtime_environment,
 )
+from crawl_options import add_crawl_arguments, prompt_crawl_options
 from crawler import CrawlError, crawl_all, save_records
 from renderer import render
 
@@ -77,17 +78,19 @@ def _log_crawl_health(summary: dict[str, Any]) -> None:
         )
 
 
-def run(target_date: str) -> None:
+def run(target_date: str, keywords: list[str] | None = None, limit: int | None = None) -> None:
     """Execute the full pipeline for a given date.
 
     Steps:
-        1. Crawl all KEYWORDS on Xianyu → list[CrawlRecord]
+        1. Crawl the requested keywords on Xianyu → list[CrawlRecord]
         2. Save daily documents and a new run folder
         3. Analyze records → AnalysisResult
         4. Render PNG + post.txt
 
     Args:
         target_date: Date string "YYYY-MM-DD" to process.
+        keywords: Selected keywords; None uses the configured defaults.
+        limit: Maximum unique items per keyword; None keeps two-page sampling.
     """
     validate_runtime_environment()
     logger.info("=== AI Shovel Index daily run — %s ===", target_date)
@@ -95,7 +98,7 @@ def run(target_date: str) -> None:
 
     # ── Step 1: Crawl ──────────────────────────────────────────────────────
     logger.info("[1/4] Crawling Xianyu…")
-    records = crawl_all(target_date=target_date)
+    records = crawl_all(target_date=target_date, keywords=keywords, limit=limit)
 
     crawl_summary = _summarize_crawl(records)
     logger.info(
@@ -117,7 +120,7 @@ def run(target_date: str) -> None:
 
     # ── Step 3: Analyze ────────────────────────────────────────────────────
     logger.info("[3/4] Analyzing…")
-    result = analyze(target_date)
+    result = analyze(target_date, keywords=[record["keyword"] for record in records])
     logger.info(
         "Index: %.2f  Status: %s  warming_up: %s",
         result["index"],
@@ -157,6 +160,8 @@ def run(target_date: str) -> None:
 
 def _build_arg_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Run the AI Shovel Index daily pipeline.")
+    add_crawl_arguments(parser)
+    parser.add_argument("--interactive", action="store_true", help="交互输入关键词和抓取数量。")
     parser.add_argument(
         "--date",
         type=str,
@@ -171,7 +176,13 @@ if __name__ == "__main__":
     target = args.date or utc_today_str()
 
     try:
-        run(target)
+        keywords, limit = args.keyword, args.limit
+        if args.interactive:
+            keywords, limit = prompt_crawl_options(keywords, limit)
+        run(target, keywords=keywords, limit=limit)
+    except (EOFError, KeyboardInterrupt):
+        logger.error("运行已取消。")
+        sys.exit(1)
     except Exception:
         logger.exception("Pipeline failed")
         sys.exit(1)

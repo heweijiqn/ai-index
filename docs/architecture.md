@@ -54,7 +54,11 @@ silently removed. Existing history can still affect trend and warm-up calculatio
   Explicit output_dir means the caller owns that run folder; omitted output_dir
   allocates a fresh folder. post.txt shares the folder with its three images.
 - run_daily.py validates a complete crawl, allocates a run folder, saves document
-  snapshots/history, analyzes and renders into that same folder.
+  snapshots/history, analyzes only that batch's keywords and renders into that
+  same folder. Same-date history still retains other previously saved keywords.
+- crawl_options.py shares validated repeatable --keyword and positive --limit
+  arguments between the crawler and daily CLI. run.bat enables --interactive,
+  prompting in Chinese for missing keywords and the per-keyword unique item limit.
 - smoke_test.py and preview_all.py allocate fresh folders per generation; sample
   data remains separate from live history.
 
@@ -88,8 +92,13 @@ at data/browser-profile. login.bat lets the user sign in and complete challenges
 run.bat reuses the profile. AI_INDEX_BROWSER_CHANNEL selects the browser and
 AI_INDEX_HEADLESS selects headless operation. Renderer screenshots still use the
 separately installed Playwright Chromium. A session can expire and require manual
-login again. At most two pages are sampled per keyword; counts are sampled items,
-not the platform-wide total.
+login again. With --limit, normal pagination continues until that many unique
+items have been collected or the search ends; the last page is truncated before
+computing sellers and average price. Exhausted searches log the actual count,
+while failed/repeated pages still abort the batch. Without --limit, unattended
+Python entry points retain the two-page default and configured keyword list.
+Counts are sampled items, not the platform-wide total. Users should keep limits
+consistent across dates because changing the sample size affects index trends.
 
 The display maintainer is hwj, configurable through AI_INDEX_AUTHOR. The GitHub
 repository is https://github.com/heweijiqn/ai-index, maintained as a standalone

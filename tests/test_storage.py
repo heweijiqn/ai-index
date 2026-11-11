@@ -121,7 +121,7 @@ def test_two_daily_runs_have_separate_images_text_and_data(monkeypatch, tmp_path
     monkeypatch.setattr(storage, "HISTORY_DIR", config.HISTORY_DIR)
     monkeypatch.setattr(config, "OUTPUT_DIR", tmp_path / "output")
     batches = iter([[row(count=10)], [row(count=20)]])
-    monkeypatch.setattr(run_daily, "crawl_all", lambda target_date: next(batches))
+    monkeypatch.setattr(run_daily, "crawl_all", lambda **kwargs: next(batches))
     run_daily.run("2026-11-11")
     first = next(config.OUTPUT_DIR.iterdir())
     original = {p.name: p.read_bytes() for p in first.iterdir()}

@@ -100,7 +100,7 @@ def records_text(records: list[CrawlRecord]) -> str:
         "文档时间（北京时间）：" + datetime.now(LOCAL_TIMEZONE).strftime("%Y-%m-%d %H:%M:%S"),
         f"关键词记录数：{len(records)}",
         f"商品记录合计：{sum(row['item_count'] for row in records)}",
-        "说明：每个关键词最多采样两页，关键词之间可能包含重复商品。",
+        "说明：商品数量为本次搜索的去重采样数，关键词之间可能包含重复商品。",
         "",
     ]
     if records and not any(row["item_count"] for row in records):

@@ -5,7 +5,7 @@ cd /d "%~dp0"
 set "PYTHONUTF8=1"
 set "PYTHONIOENCODING=utf-8"
 set "PLAYWRIGHT_BROWSERS_PATH=%~dp0.browsers"
-"%~dp0.venv\Scripts\python.exe" -X utf8 run_daily.py %*
+"%~dp0.venv\Scripts\python.exe" -X utf8 run_daily.py --interactive %*
 set "RUN_EXIT=%ERRORLEVEL%"
 echo.
 echo Exit code: %RUN_EXIT%

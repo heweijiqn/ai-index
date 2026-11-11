@@ -8,6 +8,7 @@ from datetime import date, timedelta
 
 import pytest
 
+import analyzer
 from analyzer import compute_index, get_status
 from config import INDEX_MAX, CrawlRecord
 
@@ -38,6 +39,21 @@ def _days_ago(n: int, anchor: str = "2026-03-06") -> str:
 
 
 TODAY = "2026-03-06"
+
+
+def test_selected_keywords_exclude_other_same_day_history(monkeypatch):
+    records = [
+        _make_record("AI 副业", TODAY, 10, 5),
+        _make_record("AI 副业", _days_ago(1), 5, 5),
+        _make_record("other", TODAY, 1000, 1000),
+        *[_make_record("other", _days_ago(day), 1, 1) for day in range(1, 8)],
+    ]
+    monkeypatch.setattr(analyzer, "get_records", lambda _: records)
+    result = analyzer.analyze(TODAY, keywords=["AI 副业"])
+    assert result["index"] == 80
+    assert result["warming_up"] is True
+    assert [entry["keyword"] for entry in result["rankings"]] == ["AI 副业"]
+    assert [entry["keyword"] for entry in result["daily_rankings"]] == ["AI 副业"]
 
 
 # ---------------------------------------------------------------------------

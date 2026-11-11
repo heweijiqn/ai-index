@@ -11,7 +11,7 @@ import run_daily
 @pytest.mark.parametrize("records", [[], [{"keyword": "AI", "item_count": 0}]])
 def test_empty_crawl_never_writes_or_renders(monkeypatch, records):
     monkeypatch.setattr(run_daily, "validate_runtime_environment", lambda: None)
-    monkeypatch.setattr(run_daily, "crawl_all", lambda target_date: records)
+    monkeypatch.setattr(run_daily, "crawl_all", lambda **kwargs: records)
     monkeypatch.setattr(run_daily, "save_records", lambda _: pytest.fail("must not write"))
     monkeypatch.setattr(run_daily, "render", lambda _: pytest.fail("must not render"))
     with pytest.raises(run_daily.CrawlError):
@@ -21,7 +21,7 @@ def test_empty_crawl_never_writes_or_renders(monkeypatch, records):
 def test_blocked_crawl_never_writes_or_renders(monkeypatch):
     monkeypatch.setattr(run_daily, "validate_runtime_environment", lambda: None)
 
-    def blocked(target_date):
+    def blocked(**kwargs):
         raise run_daily.CrawlError("login required")
 
     monkeypatch.setattr(run_daily, "crawl_all", blocked)
@@ -97,13 +97,22 @@ def test_run_logs_analysis_and_output_summaries(monkeypatch, tmp_path: Path, cap
         path.write_text("ok", encoding="utf-8")
 
     monkeypatch.setattr(run_daily, "validate_runtime_environment", lambda: None)
-    monkeypatch.setattr(run_daily, "crawl_all", lambda target_date: SAMPLE_RECORDS)
+
+    def crawl(**kwargs):
+        assert kwargs == {
+            "target_date": "2026-03-06",
+            "keywords": ["Sora 教程", "AI 副业", "ChatGPT 教程", "Claude 教程"],
+            "limit": 50,
+        }
+        return SAMPLE_RECORDS
+
+    monkeypatch.setattr(run_daily, "crawl_all", crawl)
     monkeypatch.setattr(run_daily, "create_run_dir", lambda _: tmp_path)
     monkeypatch.setattr(run_daily, "save_records", lambda records, output_dir: None)
     monkeypatch.setattr(
         run_daily,
         "analyze",
-        lambda _target_date: {
+        lambda _target_date, keywords: {
             "date": "2026-03-06",
             "index": 67.0,
             "status": "speculation",
@@ -120,7 +129,11 @@ def test_run_logs_analysis_and_output_summaries(monkeypatch, tmp_path: Path, cap
     )
 
     with caplog.at_level(logging.INFO):
-        run_daily.run("2026-03-06")
+        run_daily.run(
+            "2026-03-06",
+            keywords=["Sora 教程", "AI 副业", "ChatGPT 教程", "Claude 教程"],
+            limit=50,
+        )
 
     assert "RUN_CONTEXT target_date=2026-03-06" in caplog.text
     assert (

@@ -140,3 +140,75 @@ def test_invalid_batch_does_not_create_any_document(monkeypatch, tmp_path: Path)
     with pytest.raises(ValueError):
         crawler.save_records([good, bad], output_dir=tmp_path / "run")
     assert list(tmp_path.iterdir()) == []
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    "limit,mode,expected_pages,expected_count,expected_price",
+    [
+        (1, "normal", [1], 1, 10),
+        (2, "normal", [1], 2, 15),
+        (3, "normal", [1, 2], 3, 20),
+        (4, "normal", [1, 2, 3], 4, 25),
+        (100, "normal", [1, 2, 3], 5, 30),
+        (100, "empty", [1, 2, 3], 3, 20),
+        (100, "repeat", [1, 2], None, None),
+    ],
+)
+async def test_user_limit_paginates_deduplicates_and_stops(
+    monkeypatch, caplog, limit, mode, expected_pages, expected_count, expected_price
+):
+    monkeypatch.setattr(crawler, "CRAWL_DELAY_MIN", 0)
+    monkeypatch.setattr(crawler, "CRAWL_DELAY_MAX", 0)
+    html = """<html><body>
+    <button class="search-pagination-arrow-container--fixture" onclick="load(++number)">Next</button>
+    <script>
+    let number = 1;
+    function load(n) {
+      fetch('/h5/mtop.taobao.idlemtopsearch.pc.search/1.0/?page='+n).then(r=>r.json()).then(() => {
+        document.querySelector('button').disabled = n >= 3;
+      });
+    }
+    load(number);
+    </script></body></html>"""
+    pages = []
+
+    async def route_handler(route):
+        if crawler.SEARCH_API_NAME in route.request.url:
+            number = int(route.request.url.rsplit("=", 1)[1])
+            pages.append(number)
+            rows = {
+                1: [item("1", "s1", "10"), item("2", "s1", "20")],
+                2: [item("2", "s1", "20"), item("3", "s2", "30")],
+                3: [item("4", "s2", "40"), item("5", "s3", "50")],
+            }[1 if mode == "repeat" else number]
+            if mode == "empty" and number == 3:
+                rows = []
+            await route.fulfill(content_type="application/json", body=json.dumps(payload(*rows)))
+        else:
+            await route.fulfill(content_type="text/html", body=html)
+
+    async with async_playwright() as p:
+        browser = await p.chromium.launch()
+        context = await browser.new_context()
+        await context.route("https://www.goofish.com/**", route_handler)
+        try:
+            if mode == "repeat":
+                with pytest.raises(crawler.CrawlError, match="同一批商品"):
+                    await crawler._fetch_keyword_async(
+                        "自定义 关键词", context, "2026-11-11", limit
+                    )
+            else:
+                record = await crawler._fetch_keyword_async(
+                    "自定义 关键词", context, "2026-11-11", limit
+                )
+                assert record["item_count"] == expected_count
+                assert record["avg_price"] == expected_price
+                assert record["seller_count"] == (
+                    1 if expected_count <= 2 else 2 if expected_count <= 4 else 3
+                )
+                if expected_count < limit:
+                    assert "搜索结果已结束" in caplog.text
+            assert pages == expected_pages
+        finally:
+            await browser.close()
