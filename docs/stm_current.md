@@ -169,7 +169,7 @@ live crawl results and keyword/date-filtered history; retain the CLI and JSON/TX
 - [x] Add a loopback JSON/static server with validated inputs, safe output downloads and a Windows launcher
 - [x] Build responsive Chinese search/history pages with live polling, item links, filters, empty/error states and output previews
 - [x] Add backend and browser integration coverage; verify existing tests and whole-repository checks
-- [ ] Update usage/deployment instructions, verify the live UI, and commit/push the finished work
+- [x] Update usage/deployment instructions, verify the live UI, and commit/push the finished work
 
 Validation on 2026-11-11: all 135 tests passed. Chromium integration covers live
 page previews, refresh recovery (including restored request fields), keyword/date
@@ -181,3 +181,5 @@ history and both run snapshots are readable. A live three-item crawl verified
 progress metadata, titles and item links without writing history or outputs.
 README, Windows guides and deployment instructions describe the new web.bat entry
 point, record-date versus run-date filters, persistence and service lifecycle.
+Feature commit `575c8c9` was pushed and verified on origin/main. The remote README
+title update was preserved while rebasing the feature onto the latest main.
