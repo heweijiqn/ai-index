@@ -2,7 +2,7 @@
 
 一个支持自定义关键词的闲鱼商品热度观察工作台：手动搜索、实时查看抓取结果，按关键词和时间回看历史，并生成数据文档、3 张分享卡片和发布文案。
 
-维护者：[小鱼鱼](https://github.com/heweijiqn) · [项目仓库](https://github.com/heweijiqn/ai-index)
+维护者：[hwj](https://github.com/heweijiqn) · [项目仓库](https://github.com/heweijiqn/ai-index)
 
 ## 能做什么
 
