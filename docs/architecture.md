@@ -3,8 +3,10 @@
 ## Product
 
 A daily batch tool crawls Xianyu search pages, calculates an index and renders
-three 1080×1080 images with a post caption. There is no web server or external
-database. Python 3.12 and a project-local virtual environment are used.
+three 1080×1080 images with a post caption. An optional local web workbench adds
+interactive crawling, live page results and searchable history. It binds only to
+127.0.0.1; no external database or public hosting is required. Python 3.12 and a
+project-local virtual environment are used.
 
 ## Data Flow
 
@@ -105,6 +107,34 @@ repository is https://github.com/heweijiqn/ai-index, maintained as a standalone
 public repository. The public main branch starts with a maintained snapshot
 submitted by hwj. Earlier development history is retained in local and archived
 repository backups.
+
+## Local Web Workbench
+
+`web_app.py` serves a buildless Chinese HTML/CSS/JavaScript interface from `web/`
+and a small JSON API using Python's standard-library threaded HTTP server.
+`web.bat` launches it in the project environment and opens the local browser.
+The CLI and scheduled batch entry points remain available independently.
+
+`web_jobs.py` serializes background pipeline jobs, atomically saving requests,
+timestamps, status and page-by-page item previews in `data/web-jobs/`. Crawling
+publishes structured progress through optional callbacks rather than exposing
+browser responses or credentials. `run_daily.py` reports pipeline stages and
+returns the output folder. A failed batch keeps its job error/preview, and does
+not save partial crawl observations as successful daily history. After a restart,
+unfinished jobs are marked interrupted and can be submitted again explicitly.
+
+`web_history.py` provides date/keyword filtering and pagination over validated
+daily documents, web jobs and pre-existing run snapshots. Daily history remains
+the latest observation per date/keyword; run history retains individual attempts
+and links completed outputs. Older summary-only runs have no item-level previews.
+The UI polls current jobs while running, recovers the active job after refresh,
+and offers output image previews and document downloads after completion.
+
+The loopback server checks Host/Origin and requires a per-session token on job
+creation. File downloads are limited to known artifacts under output/. It never
+serves browser profiles, arbitrary local paths or raw browser responses. Only one
+web job runs at a time; do not run CLI/login tasks against the same profile while
+a web crawl is active. No Node build or new Python dependency is required.
 
 ## Templates And Deployment
 

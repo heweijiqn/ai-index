@@ -27,6 +27,39 @@ clear error rather than being silently skipped. Keep one writer at a time.
 
 ## Windows Local Setup
 
+### Optional Local Web Workbench
+
+Double-click `web.bat` to start the loopback-only workbench and open
+`http://127.0.0.1:8765`. Keep the server console open. The Chinese UI submits
+keywords, a per-keyword item limit and record date; it polls structured status
+approximately every second and displays retained item previews after each page.
+Completion exposes image previews and downloads. The history screen filters
+daily records by record date, or individual runs by Beijing execution date,
+with partial-keyword search and pagination. Existing documents and output
+snapshots are readable without migration; old runs have no item-level previews.
+
+```powershell
+.\.venv\Scripts\python.exe -X utf8 web_app.py --open
+.\web.bat --port 8766
+```
+
+Use one of these commands, choosing another port only if needed. Linux/macOS
+can run `.venv/bin/python3 web_app.py` and open the printed local URL. No new
+Python dependency or Node build is required. The server always binds to
+127.0.0.1; the existing VPS/Docker timers remain CLI batch jobs and do not expose
+this interface publicly.
+
+Web requests/status/item previews persist in `data/web-jobs/`; back it up along
+with `data/history/` and `output/`. Refreshing or closing a browser tab does not
+stop an active job. Stopping the server can interrupt it; startup marks unfinished
+jobs interrupted instead of silently rerunning them. Only one web job runs at
+a time. Do not launch CLI crawls or a login browser against the same profile
+while a web crawl is active. Failed jobs retain previews and errors, but a
+failed crawl does not commit a partial daily batch. After a successful crawl,
+analysis/rendering failure may still leave the validated data documents.
+
+### Console Batch Entry Point
+
 Python 3.12 and all packages are installed in the project's `.venv`. Windows uses
 `.venv\Scripts\python.exe`, equivalent to `.venv/bin/python3` on Linux/macOS.
 The local renderer's headless Chromium lives in `.browsers/`.

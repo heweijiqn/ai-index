@@ -10,7 +10,7 @@ import math
 import random
 import re
 import time
-from typing import Any, TypedDict
+from typing import Any
 from urllib.parse import quote, urlsplit
 
 from playwright.async_api import (
@@ -32,9 +32,14 @@ from config import (
     CRAWL_TIMEOUT_MS,
     KEYWORDS,
     SEARCH_API_NAME,
+    XIANYU_ITEM_URL,
     XIANYU_SEARCH_URL,
     CrawlRecord,
+    ProgressCallback,
     utc_today_str,
+)
+from config import (
+    CrawlItem as SearchItem,
 )
 from crawl_options import add_crawl_arguments
 from storage import save_records
@@ -44,12 +49,6 @@ logger = logging.getLogger(__name__)
 
 class CrawlError(RuntimeError):
     """A failed crawl must not be recorded as zero market activity."""
-
-
-class SearchItem(TypedDict):
-    item_id: str
-    seller_id: str
-    price: float
 
 
 def _as_dict(value: Any) -> dict[str, Any]:
@@ -98,7 +97,15 @@ def _parse_search_payload(payload: dict[str, Any]) -> list[SearchItem]:
         price = _parse_price(raw.get("price", content.get("price", "")))
         if not seller_id or price <= 0:
             raise CrawlError("商品缺少有效价格或卖家 ID，停止本次抓取以避免错误指数。")
-        items.append(SearchItem(item_id=str(item_id), seller_id=str(seller_id), price=price))
+        items.append(
+            SearchItem(
+                item_id=str(item_id),
+                seller_id=str(seller_id),
+                price=price,
+                title=str(raw.get("title") or content.get("title") or f"商品 {item_id}"),
+                url=XIANYU_ITEM_URL.format(item_id=quote(str(item_id), safe="")),
+            )
+        )
     if data["resultList"] and not items:
         raise CrawlError("搜索结果无法识别为商品，请检查网页结构或登录状态。")
     return items
@@ -157,7 +164,11 @@ def _is_search_response(url: str) -> bool:
 
 
 async def _fetch_keyword_async(
-    keyword: str, context: BrowserContext, target_date: str, limit: int | None = None
+    keyword: str,
+    context: BrowserContext,
+    target_date: str,
+    limit: int | None = None,
+    progress: ProgressCallback | None = None,
 ) -> CrawlRecord:
     """Observe requests made by the normal page, then click its next-page button."""
     page = await context.new_page()
@@ -181,6 +192,8 @@ async def _fetch_keyword_async(
     collected: list[SearchItem] = []
     try:
         logger.info("Fetching keyword '%s'", keyword)
+        if progress:
+            progress({"stage": "crawling", "keyword": keyword, "page": 0})
         await page.goto(
             XIANYU_SEARCH_URL.format(keyword=quote(keyword, safe="")),
             wait_until="domcontentloaded",
@@ -202,6 +215,16 @@ async def _fetch_keyword_async(
             if not new_items:
                 raise CrawlError("翻页后仍是同一批商品，停止抓取以避免重复计数。")
             collected.extend(new_items if limit is None else new_items[: limit - len(collected)])
+            if progress:
+                progress(
+                    {
+                        "stage": "crawling",
+                        "keyword": keyword,
+                        "page": page_num,
+                        "record": _aggregate_items(collected, keyword, target_date),
+                        "items": list(collected),
+                    }
+                )
             if limit is not None and len(collected) >= limit:
                 break
             if limit is None and page_num == CRAWL_PAGES:
@@ -227,6 +250,16 @@ async def _fetch_keyword_async(
             keyword,
             limit,
             len(collected),
+        )
+    if progress and not collected:
+        progress(
+            {
+                "stage": "crawling",
+                "keyword": keyword,
+                "page": page_num,
+                "record": _aggregate_items([], keyword, target_date),
+                "items": [],
+            }
         )
     return _aggregate_items(collected, keyword, target_date)
 
@@ -275,7 +308,10 @@ def login() -> None:
 
 
 async def _crawl_all_async(
-    target_date: str, keywords: list[str] | None = None, limit: int | None = None
+    target_date: str,
+    keywords: list[str] | None = None,
+    limit: int | None = None,
+    progress: ProgressCallback | None = None,
 ) -> list[CrawlRecord]:
     records: list[CrawlRecord] = []
     async with async_playwright() as playwright:
@@ -284,14 +320,19 @@ async def _crawl_all_async(
             for index, keyword in enumerate(KEYWORDS if keywords is None else keywords):
                 if index:
                     await asyncio.sleep(random.uniform(CRAWL_DELAY_MIN, CRAWL_DELAY_MAX))
-                records.append(await _fetch_keyword_async(keyword, context, target_date, limit))
+                records.append(
+                    await _fetch_keyword_async(keyword, context, target_date, limit, progress)
+                )
         finally:
             await context.close()
     return records
 
 
 def crawl_all(
-    target_date: str | None = None, keywords: list[str] | None = None, limit: int | None = None
+    target_date: str | None = None,
+    keywords: list[str] | None = None,
+    limit: int | None = None,
+    progress: ProgressCallback | None = None,
 ) -> list[CrawlRecord]:
     """Return a complete batch or raise before the caller can persist partial data."""
     if limit is not None and (type(limit) is not int or limit <= 0):
@@ -300,7 +341,7 @@ def crawl_all(
         if not keywords or any(not keyword.strip() for keyword in keywords):
             raise ValueError("关键词不能为空。")
         keywords = list(dict.fromkeys(keyword.strip() for keyword in keywords))
-    return asyncio.run(_crawl_all_async(target_date or utc_today_str(), keywords, limit))
+    return asyncio.run(_crawl_all_async(target_date or utc_today_str(), keywords, limit, progress))
 
 
 def _build_arg_parser() -> argparse.ArgumentParser:

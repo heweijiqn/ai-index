@@ -157,3 +157,27 @@ Documentation commit `de7b464` was pushed and verified on origin/main. Six usage
 documents (including the local-only Windows quick guide) were checked for valid
 links, balanced Markdown code fences and matching CLI example arguments. Both
 entry points' help screens and git diff --check passed; application code was unchanged.
+
+## Local Search And History Workbench
+
+**Goal**: add a simple local Chinese UI for manual keyword/item-limit search,
+live crawl results and keyword/date-filtered history; retain the CLI and JSON/TXT store.
+
+- [x] Update product scope and architecture for an optional loopback web workbench
+- [x] Add shared structured crawl progress and item previews, plus pipeline stage/output callbacks
+- [x] Add persistent single-job execution, restart recovery and filtered/paginated daily/run history including old snapshots
+- [x] Add a loopback JSON/static server with validated inputs, safe output downloads and a Windows launcher
+- [x] Build responsive Chinese search/history pages with live polling, item links, filters, empty/error states and output previews
+- [x] Add backend and browser integration coverage; verify existing tests and whole-repository checks
+- [ ] Update usage/deployment instructions, verify the live UI, and commit/push the finished work
+
+Validation on 2026-11-11: all 135 tests passed. Chromium integration covers live
+page previews, refresh recovery (including restored request fields), keyword/date
+filtering, empty states, run details, output images and desktop/mobile layouts.
+Backend checks cover request validation, job serialization/restart/failure,
+render-failure snapshot linking, pagination, old snapshots and file/origin access
+boundaries. Whole-repository Black/Ruff/mypy checks passed. Existing local daily
+history and both run snapshots are readable. A live three-item crawl verified
+progress metadata, titles and item links without writing history or outputs.
+README, Windows guides and deployment instructions describe the new web.bat entry
+point, record-date versus run-date filters, persistence and service lifecycle.

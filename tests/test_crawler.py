@@ -199,11 +199,19 @@ async def test_user_limit_paginates_deduplicates_and_stops(
                         "自定义 关键词", context, "2026-11-11", limit
                     )
             else:
+                events = []
                 record = await crawler._fetch_keyword_async(
-                    "自定义 关键词", context, "2026-11-11", limit
+                    "自定义 关键词", context, "2026-11-11", limit, events.append
                 )
                 assert record["item_count"] == expected_count
                 assert record["avg_price"] == expected_price
+                assert events[0]["page"] == 0
+                assert events[-1]["record"] == record
+                assert len(events[-1]["items"]) == expected_count
+                assert all(
+                    item["url"].startswith("https://www.goofish.com/item?id=")
+                    for item in events[-1]["items"]
+                )
                 assert record["seller_count"] == (
                     1 if expected_count <= 2 else 2 if expected_count <= 4 else 3
                 )

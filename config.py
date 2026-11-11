@@ -6,9 +6,10 @@ keywords, or weights.
 
 import os
 import sys
+from collections.abc import Callable
 from datetime import UTC, datetime, timedelta, timezone
 from pathlib import Path
-from typing import TypedDict
+from typing import NotRequired, TypedDict
 from uuid import uuid4
 
 # ---------------------------------------------------------------------------
@@ -27,6 +28,13 @@ LOCAL_TIMEZONE = timezone(timedelta(hours=8), name="Asia/Shanghai")
 BROWSER_PROFILE_DIR: Path = DATA_DIR / "browser-profile"
 XIANYU_SEARCH_URL: str = "https://www.goofish.com/search?q={keyword}"
 SEARCH_API_NAME: str = "mtop.taobao.idlemtopsearch.pc.search"
+XIANYU_ITEM_URL: str = "https://www.goofish.com/item?id={item_id}"
+APP_TITLE: str = "AI 铲子指数"
+WEB_DIR: Path = ROOT_DIR / "web"
+WEB_JOBS_DIR: Path = DATA_DIR / "web-jobs"
+WEB_HOST: str = "127.0.0.1"
+WEB_PORT: int = 8765
+WEB_DEFAULT_LIMIT: int = 100
 BROWSER_CHANNEL: str = os.environ.get(
     "AI_INDEX_BROWSER_CHANNEL", "chrome" if sys.platform == "win32" else "chromium"
 )
@@ -116,6 +124,31 @@ class CrawlRecord(TypedDict):
     item_count: int  # 0 only for a confirmed empty search, never a failed request
     seller_count: int
     avg_price: float
+
+
+class CrawlItem(TypedDict):
+    """A retained search item; old fixtures may omit display-only fields."""
+
+    item_id: str
+    seller_id: str
+    price: float
+    title: NotRequired[str]
+    url: NotRequired[str]
+
+
+class CrawlProgress(TypedDict, total=False):
+    """Structured progress, safe to persist and display in the local workbench."""
+
+    stage: str
+    keyword: str
+    page: int
+    record: CrawlRecord
+    items: list[CrawlItem]
+    message: str
+    output_id: str
+
+
+ProgressCallback = Callable[[CrawlProgress], None]
 
 
 class RankingEntry(TypedDict):

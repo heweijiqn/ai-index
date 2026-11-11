@@ -11,7 +11,7 @@ import config
 import migrate_history
 import run_daily
 import storage
-from config import CrawlRecord
+from config import CrawlProgress, CrawlRecord
 
 
 def row(day: str = "2026-11-11", keyword: str = "AI 副业", count: int = 10) -> CrawlRecord:
@@ -121,12 +121,28 @@ def test_two_daily_runs_have_separate_images_text_and_data(monkeypatch, tmp_path
     monkeypatch.setattr(storage, "HISTORY_DIR", config.HISTORY_DIR)
     monkeypatch.setattr(config, "OUTPUT_DIR", tmp_path / "output")
     batches = iter([[row(count=10)], [row(count=20)]])
-    monkeypatch.setattr(run_daily, "crawl_all", lambda **kwargs: next(batches))
+
+    def crawl(**kwargs):
+        records = next(batches)
+        if kwargs.get("progress"):
+            kwargs["progress"]({"stage": "crawling", "record": records[0]})
+        return records
+
+    monkeypatch.setattr(run_daily, "crawl_all", crawl)
     run_daily.run("2026-11-11")
     first = next(config.OUTPUT_DIR.iterdir())
     original = {p.name: p.read_bytes() for p in first.iterdir()}
-    run_daily.run("2026-11-11")
+    events: list[CrawlProgress] = []
+    second = run_daily.run("2026-11-11", progress=events.append)
     folders = list(config.OUTPUT_DIR.iterdir())
+    assert second in folders
+    assert [event["stage"] for event in events] == [
+        "crawling",
+        "crawling",
+        "saving",
+        "analyzing",
+        "rendering",
+    ]
     assert len(folders) == 2
     assert {p.name: p.read_bytes() for p in first.iterdir()} == original
     for folder in folders:

@@ -11,12 +11,14 @@ import argparse
 import logging
 import sys
 from collections.abc import Mapping, Sequence
+from pathlib import Path
 from typing import Any
 
 from analyzer import analyze
 from config import (
     CRAWL_FAILURE_ERROR_RATIO,
     CRAWL_FAILURE_WARN_RATIO,
+    ProgressCallback,
     create_run_dir,
     utc_today_str,
     validate_runtime_environment,
@@ -78,7 +80,12 @@ def _log_crawl_health(summary: dict[str, Any]) -> None:
         )
 
 
-def run(target_date: str, keywords: list[str] | None = None, limit: int | None = None) -> None:
+def run(
+    target_date: str,
+    keywords: list[str] | None = None,
+    limit: int | None = None,
+    progress: ProgressCallback | None = None,
+) -> Path:
     """Execute the full pipeline for a given date.
 
     Steps:
@@ -98,7 +105,13 @@ def run(target_date: str, keywords: list[str] | None = None, limit: int | None =
 
     # ── Step 1: Crawl ──────────────────────────────────────────────────────
     logger.info("[1/4] Crawling Xianyu…")
-    records = crawl_all(target_date=target_date, keywords=keywords, limit=limit)
+    if progress is None:
+        records = crawl_all(target_date=target_date, keywords=keywords, limit=limit)
+    else:
+        progress({"stage": "crawling", "message": "正在打开抓取浏览器"})
+        records = crawl_all(
+            target_date=target_date, keywords=keywords, limit=limit, progress=progress
+        )
 
     crawl_summary = _summarize_crawl(records)
     logger.info(
@@ -114,12 +127,22 @@ def run(target_date: str, keywords: list[str] | None = None, limit: int | None =
 
     # ── Step 2: Persist ────────────────────────────────────────────────────
     logger.info("[2/4] Saving data documents…")
+    if progress:
+        progress({"stage": "saving", "message": "正在保存本次数据"})
     output_dir = create_run_dir(target_date)
     save_records(records, output_dir=output_dir)
     logger.info("RUN_FOLDER %s", output_dir)
 
     # ── Step 3: Analyze ────────────────────────────────────────────────────
     logger.info("[3/4] Analyzing…")
+    if progress:
+        progress(
+            {
+                "stage": "analyzing",
+                "message": "正在计算指数与趋势",
+                "output_id": output_dir.name,
+            }
+        )
     result = analyze(target_date, keywords=[record["keyword"] for record in records])
     logger.info(
         "Index: %.2f  Status: %s  warming_up: %s",
@@ -137,6 +160,8 @@ def run(target_date: str, keywords: list[str] | None = None, limit: int | None =
 
     # ── Step 4: Render ─────────────────────────────────────────────────────
     logger.info("[4/4] Rendering output files…")
+    if progress:
+        progress({"stage": "rendering", "message": "正在生成三张图片和发布文案"})
     idx_png, daily_png, wkly_png, txt_path = render(result, output_dir=output_dir)
 
     logger.info("=== Done ===")
@@ -156,6 +181,7 @@ def run(target_date: str, keywords: list[str] | None = None, limit: int | None =
     print(f"Card2 (daily):   {daily_png}")
     print(f"Card3 (weekly):  {wkly_png}")
     print(f"TXT:             {txt_path}")
+    return output_dir
 
 
 def _build_arg_parser() -> argparse.ArgumentParser:
