@@ -150,5 +150,10 @@ Feature commit `fb9ea8a` was pushed to origin/main and verified with ls-remote.
 
 - [x] Add a visible input walkthrough, copyable examples and input troubleshooting to README and Windows usage guides
 - [x] Align deployment, VPS and Docker instructions with configurable keyword/item limits and unattended defaults
-- [ ] Check documented options against both CLI help screens, review document links/diffs, and commit the documentation update
-- [ ] Push the documentation update and verify origin/main
+- [x] Check documented options against both CLI help screens, review document links/diffs, and commit the documentation update
+- [x] Push the documentation update and verify origin/main
+
+Documentation commit `de7b464` was pushed and verified on origin/main. Six usage
+documents (including the local-only Windows quick guide) were checked for valid
+links, balanced Markdown code fences and matching CLI example arguments. Both
+entry points' help screens and git diff --check passed; application code was unchanged.
