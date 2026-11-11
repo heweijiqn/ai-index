@@ -11,6 +11,7 @@ from pathlib import Path
 from typing import Any
 
 from config import (
+    APP_TITLE,
     HISTORY_DIR,
     LOCAL_TIMEZONE,
     RECORDS_JSON_NAME,
@@ -95,7 +96,7 @@ def _read_document(path: Path) -> list[CrawlRecord]:
 def records_text(records: list[CrawlRecord]) -> str:
     """Produce a plain Chinese document that opens directly in Windows Notepad."""
     lines = [
-        "AI 铲子指数 — 抓取数据",
+        f"{APP_TITLE} — 抓取数据",
         "=" * 48,
         "文档时间（北京时间）：" + datetime.now(LOCAL_TIMEZONE).strftime("%Y-%m-%d %H:%M:%S"),
         f"关键词记录数：{len(records)}",

@@ -14,7 +14,7 @@ from PIL import Image
 from playwright.sync_api import expect, sync_playwright
 
 import storage
-from config import CrawlProgress, CrawlRecord
+from config import APP_TITLE, AUTHOR_HANDLE, CrawlProgress, CrawlRecord
 from web_app import WorkbenchServer
 from web_history import artifact, daily_history, run_history
 from web_jobs import JobManager, parse_request
@@ -248,6 +248,9 @@ def test_browser_live_search_refresh_filters_details_and_mobile(
         try:
             page.goto(url)
             expect(page.locator("#start-button")).to_be_enabled()
+            expect(page.locator("#brand-title")).to_have_text(APP_TITLE)
+            expect(page.locator("#author")).to_have_text(AUTHOR_HANDLE)
+            expect(page.locator("#avatar")).to_have_text(AUTHOR_HANDLE[0].upper())
             page.locator("#keywords").fill("AI 副业")
             page.locator("#limit").fill("3")
             page.locator("#record-date").fill("2026-11-11")

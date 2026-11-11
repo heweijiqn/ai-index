@@ -1,4 +1,4 @@
-# VPS Deployment Kit
+# 热卖指数 — VPS Deployment Kit
 
 This directory contains a concrete deployment path for the recommended target:
 Ubuntu VPS + systemd timer.

@@ -101,7 +101,8 @@ All 94 tests passed, including two same-date full generations into different fol
 - [x] Publish the tested changes to a public ai-index repository under the verified account and check the remote revision
 
 Published at https://github.com/heweijiqn/ai-index as a standalone public repository.
-Current source, README, maintainer links, templates and sample caption use hwj.
+At that publication, source, README, maintainer links, templates and sample
+caption used hwj. The current display name follows the rename section below.
 Original Git history is retained in backups. Local credentials, browser sessions,
 data documents, outputs, environments and backups are excluded from the source
 snapshot. All 94 local tests and Black/Ruff/mypy checks passed before publication.
@@ -183,3 +184,18 @@ README, Windows guides and deployment instructions describe the new web.bat entr
 point, record-date versus run-date filters, persistence and service lifecycle.
 Feature commit `575c8c9` was pushed and verified on origin/main. The remote README
 title update was preserved while rebasing the feature onto the latest main.
+
+## Rename Product To 热卖指数
+
+- [x] Change the visible maintainer name to 小鱼鱼 across the web profile, generated output signatures and current usage documentation
+- [x] Centralize the new title, tagline and post hashtags in config.py; apply them to web, rendered cards, text reports, posts and CLI display
+- [x] Align README, Windows usage guides, vision, architecture, deployment descriptions and design-reference labeling with the broader keyword workbench
+- [x] Update affected fixtures/assertions; verify web title, card text, post/report branding, rendering and project checks
+- [ ] Commit and push the naming/documentation changes and verify origin/main
+
+Validation on 2026-11-11: all 135 tests passed, including browser assertions for
+the configured workbench title, profile name and avatar, and post/report branding
+checks. Whole-repository Black/Ruff/mypy checks passed. A fresh smoke run rendered
+all three cards with 热卖指数 and 小鱼鱼, visually inspected at 1080×1080, plus
+updated caption hashtags. Current usage guides, README, architecture and product
+vision use the new product/display names. Existing run snapshots stay immutable.

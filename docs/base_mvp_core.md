@@ -1,4 +1,6 @@
-# AI Shovel Index — MVP Context
+# 热卖指数 — 初期设计参考
+
+> 本文保留早期研究方案，仅供设计背景参考。当前产品已扩展为自定义关键词的本地搜索与历史工作台；安装和日常操作以 [README](../README.md)、[使用手册](../使用手册.txt) 和 [架构文档](architecture.md) 为准。文中的旧存储和单卡示例不属于当前运行说明。
 
 ## 1. 目标
 
@@ -121,7 +123,7 @@ index = min(index, 100)
 最终输出：
 
 ```
-AI SHOVEL INDEX
+热卖指数
 Score: XX / 100
 Status: speculation
 ```
@@ -142,7 +144,7 @@ Status: speculation
 
 ```
 Title:
-AI Shovel Index
+热卖指数
 
 Score:
 67 / 100
@@ -170,7 +172,7 @@ index_YYYY_MM_DD.png
 同时生成一段文本：
 
 ```
-AI Shovel Index #23
+热卖指数 #23
 
 Sora 教程
 +52%
@@ -270,7 +272,7 @@ def render(index, history):
 
     plt.plot(history)
 
-    plt.title(f"AI Shovel Index: {index}")
+    plt.title(f"热卖指数: {index}")
 
     plt.savefig("index.png")
 ```

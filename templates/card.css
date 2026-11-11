@@ -1,4 +1,4 @@
-/* templates/card.css — Tailwind source for AI Shovel Index card.
+/* templates/card.css — Tailwind source for the legacy index card.
    Build: npx tailwindcss -i templates/card.css -o templates/card.compiled.css --minify
    Style: Stripe / Linear dark gradient — SVG semicircle gauge + keyword list
 */

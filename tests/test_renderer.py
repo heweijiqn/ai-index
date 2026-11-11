@@ -12,9 +12,11 @@ from PIL import Image
 
 import renderer
 from config import (
+    APP_TITLE,
     AUTHOR_HANDLE,
     IMAGE_HEIGHT,
     IMAGE_WIDTH,
+    POST_HASHTAGS,
     AnalysisResult,
     DailyRankingEntry,
     RankingEntry,
@@ -195,12 +197,15 @@ class TestPostTxt:
     def test_hashtags_in_post(self, tmp_path: Path) -> None:
         result = _make_result()
         *_, txt_path = render(result, output_dir=tmp_path)
-        assert "#AIshovelindex" in txt_path.read_text(encoding="utf-8")
+        content = txt_path.read_text(encoding="utf-8")
+        assert all(tag in content for tag in POST_HASHTAGS)
 
     def test_configured_display_name_in_post(self, tmp_path: Path) -> None:
         result = _make_result()
         *_, txt_path = render(result, output_dir=tmp_path)
-        assert AUTHOR_HANDLE in txt_path.read_text(encoding="utf-8")
+        content = txt_path.read_text(encoding="utf-8")
+        assert AUTHOR_HANDLE in content
+        assert content.startswith(APP_TITLE)
 
     def test_week_delta_in_post_when_not_warming_up(self, tmp_path: Path) -> None:
         result = _make_result(warming_up=False, week_delta=7.3)

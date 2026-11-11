@@ -16,6 +16,7 @@ from typing import Any
 
 from analyzer import analyze
 from config import (
+    APP_TITLE,
     CRAWL_FAILURE_ERROR_RATIO,
     CRAWL_FAILURE_WARN_RATIO,
     ProgressCallback,
@@ -100,7 +101,7 @@ def run(
         limit: Maximum unique items per keyword; None keeps two-page sampling.
     """
     validate_runtime_environment()
-    logger.info("=== AI Shovel Index daily run — %s ===", target_date)
+    logger.info("=== %s daily run — %s ===", APP_TITLE, target_date)
     logger.info("RUN_CONTEXT target_date=%s", target_date)
 
     # ── Step 1: Crawl ──────────────────────────────────────────────────────
@@ -185,7 +186,7 @@ def run(
 
 
 def _build_arg_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description="Run the AI Shovel Index daily pipeline.")
+    parser = argparse.ArgumentParser(description=f"{APP_TITLE}：抓取、分析并生成图片与文案。")
     add_crawl_arguments(parser)
     parser.add_argument("--interactive", action="store_true", help="交互输入关键词和抓取数量。")
     parser.add_argument(

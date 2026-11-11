@@ -1,5 +1,5 @@
 [Unit]
-Description=AI Shovel Index daily batch in Docker
+Description=热卖指数 daily batch in Docker
 Wants=docker.service network-online.target
 After=docker.service network-online.target
 ConditionPathExists=__APP_DIR__/deploy/docker/compose.yml

@@ -1,8 +1,9 @@
-# AI Shovel Index — Architecture
+# 热卖指数 — Architecture
 
 ## Product
 
-A daily batch tool crawls Xianyu search pages, calculates an index and renders
+热卖指数 observes arbitrary user-chosen Xianyu product/category/topic keywords.
+A batch tool crawls search pages, calculates a sample-heat index and renders
 three 1080×1080 images with a post caption. An optional local web workbench adds
 interactive crawling, live page results and searchable history. It binds only to
 127.0.0.1; no external database or public hosting is required. Python 3.12 and a
@@ -102,7 +103,11 @@ Python entry points retain the two-page default and configured keyword list.
 Counts are sampled items, not the platform-wide total. Users should keep limits
 consistent across dates because changing the sample size affects index trends.
 
-The display maintainer is hwj, configurable through AI_INDEX_AUTHOR. The GitHub
+APP_TITLE, APP_TAGLINE and POST_HASHTAGS in config.py define the shared public
+name, card tagline and caption tags. The title is 热卖指数 and the display
+maintainer is 小鱼鱼, configurable through AI_INDEX_AUTHOR for both web and
+output signatures. Existing repository paths, service unit identifiers and
+AI_INDEX_* environment names are retained for installation compatibility. The GitHub
 repository is https://github.com/heweijiqn/ai-index, maintained as a standalone
 public repository. The public main branch starts with a maintained snapshot
 submitted by hwj. Earlier development history is retained in local and archived

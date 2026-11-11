@@ -11,7 +11,7 @@ import config
 import migrate_history
 import run_daily
 import storage
-from config import CrawlProgress, CrawlRecord
+from config import APP_TITLE, CrawlProgress, CrawlRecord
 
 
 def row(day: str = "2026-11-11", keyword: str = "AI 副业", count: int = 10) -> CrawlRecord:
@@ -30,6 +30,7 @@ def test_same_date_replaces_latest_but_preserves_run_documents(tmp_path: Path):
     assert storage.load_records("2026-11-11", 1, history_dir=history) == [row(count=25)]
     assert {p.name: p.read_bytes() for p in first.iterdir()} == original
     text = (second / config.RECORDS_TEXT_NAME).read_text(encoding="utf-8-sig")
+    assert text.startswith(APP_TITLE)
     assert "商品数量：25 件" in text
     assert "AI 副业" in text
 

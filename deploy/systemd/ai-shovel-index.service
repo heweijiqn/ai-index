@@ -1,5 +1,5 @@
 [Unit]
-Description=AI Shovel Index daily batch
+Description=热卖指数 daily batch
 Wants=network-online.target
 After=network-online.target
 ConditionPathExists=__APP_DIR__/run_daily.py

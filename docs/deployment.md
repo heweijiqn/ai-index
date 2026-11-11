@@ -1,4 +1,10 @@
-# AI Shovel Index — Deployment Guide
+# 热卖指数 — Deployment Guide
+
+热卖指数 is a local workbench for user-selected product, category or topic
+keywords. The web profile and generated signatures default to 小鱼鱼;
+`AI_INDEX_AUTHOR` overrides that display name. Existing ai-index repository URLs,
+ai-shovel-index service/directory identifiers and AI_INDEX_* variables remain
+compatible with installed deployments.
 
 ## Current Storage And Outputs
 

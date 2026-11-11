@@ -72,7 +72,7 @@ def _mean(values: list[float]) -> float:
 
 
 def compute_index(records: list[CrawlRecord], today: str) -> AnalysisResult:
-    """Compute the daily AI Shovel Index from crawl records.
+    """Compute the daily keyword heat index from crawl records.
 
     Algorithm:
         For each keyword:

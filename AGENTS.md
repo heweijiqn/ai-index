@@ -1,4 +1,4 @@
-# AI-Shovel-Index Agent Guide
+# 热卖指数 Agent Guide
 
 Use this file as the workspace-wide instruction source for this repo.
 
@@ -89,7 +89,7 @@ py -3.12 -m venv .venv
 - Public function signatures should be fully typed.
 - Keep imports grouped as stdlib, third-party, local.
 - Use `config.py` constants for paths, author handle, and shared settings.
-- Default display maintainer is `hwj`; `AI_INDEX_AUTHOR` overrides the output signature.
+- Product title/tagline/hashtags come from `config.py`. Default display maintainer is `小鱼鱼`; `AI_INDEX_AUTHOR` overrides the web display name and output signature.
 - User-facing HTML template text must remain Chinese.
 - Do not hardcode brand strings or output paths outside `config.py`.
 - Prefer `logging`; `print()` is only acceptable in CLI or dry-run output.

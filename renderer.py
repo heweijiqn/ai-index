@@ -22,9 +22,12 @@ from playwright.async_api import async_playwright
 
 from config import (
     ACTIVE_TEMPLATE_NAMES,
+    APP_TAGLINE,
+    APP_TITLE,
     AUTHOR_HANDLE,
     IMAGE_HEIGHT,
     IMAGE_WIDTH,
+    POST_HASHTAGS,
     STATUS_COLORS,
     TEMPLATES_DIR,
     AnalysisResult,
@@ -58,19 +61,19 @@ _STATUS_BADGE: dict[str, str] = {
 
 # Card 3 驱动词摘要（中文）
 _DRIVER_SUMMARIES: dict[str, str] = {
-    "cold": "投机活动整体低迷。",
-    "early": "教程需求初步浮现，值得持续观察。",
-    "rising": "多个品类教程市场同步升温。",
-    "speculation": "各 AI 细分领域投机需求信号强烈。",
-    "bubble": "教程数量急剧扩张，可能进入泡沫区间。",
+    "cold": "关注关键词的商品采样热度较低。",
+    "early": "部分关键词出现初步升温信号。",
+    "rising": "多个关键词的商品采样热度同步上升。",
+    "speculation": "关注关键词的商品采样数量增长明显。",
+    "bubble": "商品采样数量快速扩张，需结合采样上限解读。",
 }
 
 _COOLING_SUMMARIES: dict[str, str] = {
     "cold": "",
     "early": "",
-    "rising": "部分话题热度下滑，资金转向新兴赛道。",
-    "speculation": "市场轮动明显，资金追逐更新的关键词。",
-    "bubble": "老牌 AI 教程品类出现早期饱和迹象。",
+    "rising": "部分关键词的商品采样热度回落。",
+    "speculation": "不同关键词的采样变化出现分化。",
+    "bubble": "部分关键词增长放缓，建议继续观察后续变化。",
 }
 
 # Max drivers / cooling shown on Card 3
@@ -189,6 +192,8 @@ def _base_context(result: AnalysisResult) -> dict:
         "warming_up": result["warming_up"],
         "accent_color": accent,
         "author_handle": AUTHOR_HANDLE,
+        "app_title": APP_TITLE,
+        "app_tagline": APP_TAGLINE,
     }
 
 
@@ -359,7 +364,7 @@ def _write_post(result: AnalysisResult, txt_path: Path) -> None:
     delta_part = f"  {delta_sign}{week_delta:.1f} vs last week" if not result["warming_up"] else ""
 
     lines: list[str] = [
-        f"AI Shovel Index  {result['date']}",
+        f"{APP_TITLE}  {result['date']}",
         "",
         f"Score   {int(result['index'])} / 100{delta_part}",
         f"Status  {result['status'].upper()}",
@@ -386,7 +391,7 @@ def _write_post(result: AnalysisResult, txt_path: Path) -> None:
     if result["warming_up"]:
         lines += ["", "(warming up — fewer than 7 days of data)"]
 
-    lines += ["", f"{AUTHOR_HANDLE}  #AIshovelindex #AI #tech"]
+    lines += ["", f"{AUTHOR_HANDLE}  {' '.join(POST_HASHTAGS)}"]
 
     txt_path.write_text("\n".join(lines), encoding="utf-8")
     logger.info("post.txt saved: %s", txt_path)

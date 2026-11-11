@@ -1,4 +1,4 @@
-# Docker Deployment Kit
+# 热卖指数 — Docker Deployment Kit
 
 This directory packages the project for the optimized VPS path:
 Ubuntu VPS + Docker Compose + systemd timer.

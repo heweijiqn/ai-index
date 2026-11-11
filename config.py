@@ -29,7 +29,9 @@ BROWSER_PROFILE_DIR: Path = DATA_DIR / "browser-profile"
 XIANYU_SEARCH_URL: str = "https://www.goofish.com/search?q={keyword}"
 SEARCH_API_NAME: str = "mtop.taobao.idlemtopsearch.pc.search"
 XIANYU_ITEM_URL: str = "https://www.goofish.com/item?id={item_id}"
-APP_TITLE: str = "AI 铲子指数"
+APP_TITLE: str = "热卖指数"
+APP_TAGLINE: str = "通过闲鱼关键词采样观察商品热度变化"
+POST_HASHTAGS: tuple[str, ...] = ("#热卖指数", "#闲鱼", "#关键词观察")
 WEB_DIR: Path = ROOT_DIR / "web"
 WEB_JOBS_DIR: Path = DATA_DIR / "web-jobs"
 WEB_HOST: str = "127.0.0.1"
@@ -97,7 +99,7 @@ IMAGE_HEIGHT: int = 1080
 BG_COLOR: str = "#0a0a0a"
 TEXT_COLOR: str = "#ffffff"
 SUBTEXT_COLOR: str = "#888888"
-AUTHOR_HANDLE: str = os.environ.get("AI_INDEX_AUTHOR", "hwj")
+AUTHOR_HANDLE: str = os.environ.get("AI_INDEX_AUTHOR", "小鱼鱼")
 
 STATUS_COLORS: dict[str, str] = {
     "cold": "#4a9eff",
