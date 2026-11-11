@@ -191,7 +191,7 @@ title update was preserved while rebasing the feature onto the latest main.
 - [x] Centralize the new title, tagline and post hashtags in config.py; apply them to web, rendered cards, text reports, posts and CLI display
 - [x] Align README, Windows usage guides, vision, architecture, deployment descriptions and design-reference labeling with the broader keyword workbench
 - [x] Update affected fixtures/assertions; verify web title, card text, post/report branding, rendering and project checks
-- [ ] Commit and push the naming/documentation changes and verify origin/main
+- [x] Commit and push the naming/documentation changes and verify origin/main
 
 Validation on 2026-11-11: all 135 tests passed, including browser assertions for
 the configured workbench title, profile name and avatar, and post/report branding
@@ -199,3 +199,5 @@ checks. Whole-repository Black/Ruff/mypy checks passed. A fresh smoke run render
 all three cards with 热卖指数 and 小鱼鱼, visually inspected at 1080×1080, plus
 updated caption hashtags. Current usage guides, README, architecture and product
 vision use the new product/display names. Existing run snapshots stay immutable.
+Naming and documentation commit `a3fe073` was pushed to origin/main and its full
+revision was verified with ls-remote.
