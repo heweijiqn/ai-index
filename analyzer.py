@@ -1,0 +1,247 @@
+"""analyzer.py — Read document history and compute the daily index.
+
+Data flow:
+    JSON history documents → get_records() → compute_index() → AnalysisResult
+
+No external dependencies; uses only stdlib + config.
+"""
+
+import logging
+from collections import defaultdict
+from datetime import date, timedelta
+
+from config import (
+    HISTORY_DAYS,
+    INDEX_MAX,
+    INDEX_SCALE,
+    KEYWORDS,
+    STATUS_THRESHOLDS,
+    WEIGHT_ITEMS,
+    WEIGHT_SELLERS,
+    AnalysisResult,
+    CrawlRecord,
+    DailyRankingEntry,
+    RankingEntry,
+)
+from storage import load_records
+
+logger = logging.getLogger(__name__)
+
+
+# ---------------------------------------------------------------------------
+# Document history
+# ---------------------------------------------------------------------------
+
+
+def get_records(target_date: str, days: int = HISTORY_DAYS + 1) -> list[CrawlRecord]:
+    """Return crawl records for the most recent `days` days up to and including target_date.
+
+    Args:
+        target_date: Upper bound date string "YYYY-MM-DD" (inclusive).
+        days: How many days of history to fetch (default: HISTORY_DAYS + 1 to include today).
+
+    Returns:
+        List of CrawlRecord dicts ordered by date ascending.
+    """
+    return load_records(target_date, days)
+
+
+# ---------------------------------------------------------------------------
+# Index computation
+# ---------------------------------------------------------------------------
+
+
+def get_status(index: float) -> str:
+    """Map a numeric index value to its status label.
+
+    Args:
+        index: Float in range [0.0, 100.0].
+
+    Returns:
+        Status string: "cold" | "early" | "rising" | "speculation" | "bubble".
+    """
+    for threshold, label in STATUS_THRESHOLDS:
+        if index >= threshold:
+            return label
+    return "cold"
+
+
+def _mean(values: list[float]) -> float:
+    """Return arithmetic mean; returns 0.0 for empty list."""
+    return sum(values) / len(values) if values else 0.0
+
+
+def compute_index(records: list[CrawlRecord], today: str) -> AnalysisResult:
+    """Compute the daily AI Shovel Index from crawl records.
+
+    Algorithm:
+        For each keyword:
+            - Separate today's record from the historical baseline (past ≤7 days).
+            - growth_items   = today_items   / mean(history_items)   (1.0 if no history)
+            - growth_sellers = today_sellers / mean(history_sellers) (1.0 if no history)
+            - kw_score = (growth_items * WEIGHT_ITEMS + growth_sellers * WEIGHT_SELLERS) * INDEX_SCALE
+        Final index = mean(kw_scores), clamped to [0, INDEX_MAX].
+        warming_up = True when distinct historical days < HISTORY_DAYS.
+        week_delta = today's index minus the index computed for the oldest available day
+                     in the window (proxy for 7-days-ago baseline); 0.0 when warming_up.
+
+    Args:
+        records: All CrawlRecord rows for the relevant date window.
+        today: The target date string "YYYY-MM-DD".
+
+    Returns:
+        AnalysisResult dict.
+    """
+    # Bucket records by keyword, then split today vs history
+    today_by_kw: dict[str, CrawlRecord] = {}
+    history_by_kw: dict[str, list[CrawlRecord]] = defaultdict(list)
+
+    for rec in records:
+        if rec["date"] == today:
+            today_by_kw[rec["keyword"]] = rec
+        else:
+            history_by_kw[rec["keyword"]].append(rec)
+
+    # Determine how many distinct historical days exist (across all keywords)
+    historical_dates: set[str] = {r["date"] for r in records if r["date"] != today}
+    warming_up: bool = len(historical_dates) < HISTORY_DAYS
+
+    if warming_up:
+        logger.warning(
+            "Cold start: only %d historical day(s) available (need %d).",
+            len(historical_dates),
+            HISTORY_DAYS,
+        )
+
+    kw_scores: list[float] = []
+    rankings: list[RankingEntry] = []
+
+    # Use configured keywords as the canonical set; fall back gracefully if missing
+    active_keywords = list(today_by_kw.keys()) or KEYWORDS
+
+    for kw in active_keywords:
+        today_rec = today_by_kw.get(kw)
+        if today_rec is None:
+            logger.warning("No today record for keyword '%s', skipping.", kw)
+            continue
+
+        hist = history_by_kw.get(kw, [])
+        avg_hist_items = _mean([r["item_count"] for r in hist]) if hist else 0.0
+        avg_hist_sellers = _mean([r["seller_count"] for r in hist]) if hist else 0.0
+
+        # If no history exists, treat growth as 1.0 (neutral baseline)
+        growth_items = today_rec["item_count"] / avg_hist_items if avg_hist_items > 0 else 1.0
+        growth_sellers = (
+            today_rec["seller_count"] / avg_hist_sellers if avg_hist_sellers > 0 else 1.0
+        )
+
+        # Combined growth ratio (used for ranking display)
+        combined_growth = growth_items * WEIGHT_ITEMS + growth_sellers * WEIGHT_SELLERS
+
+        kw_score = combined_growth * INDEX_SCALE
+        kw_scores.append(kw_score)
+
+        rankings.append(RankingEntry(keyword=kw, growth=round(combined_growth - 1.0, 4)))
+
+    # Aggregate
+    raw_index = _mean(kw_scores) if kw_scores else 0.0
+    final_index = round(min(raw_index, INDEX_MAX), 2)
+
+    # Sort rankings by growth descending
+    rankings.sort(key=lambda e: e["growth"], reverse=True)
+
+    # Compute week_delta: index today minus index at the oldest available historical day.
+    # Uses the same scoring formula applied only to the oldest day's records vs its own
+    # prior day slice — but that would require deeper history.  Simpler proxy: compare
+    # today's index against the score computed from the *oldest* day's records using the
+    # remaining history as baseline.  When warming_up (< 7 historical days) we set 0.0
+    # to avoid misleading numbers.
+    week_delta: float = 0.0
+    if not warming_up and historical_dates:
+        oldest_date = min(historical_dates)
+        oldest_by_kw: dict[str, CrawlRecord] = {
+            r["keyword"]: r for r in records if r["date"] == oldest_date
+        }
+        older_history: list[CrawlRecord] = [
+            r for r in records if r["date"] != oldest_date and r["date"] != today
+        ]
+        older_by_kw: dict[str, list[CrawlRecord]] = defaultdict(list)
+        for rec in older_history:
+            older_by_kw[rec["keyword"]].append(rec)
+
+        oldest_scores: list[float] = []
+        for kw in active_keywords:
+            oldest_rec = oldest_by_kw.get(kw)
+            if oldest_rec is None:
+                continue
+            oh = older_by_kw.get(kw, [])
+            avg_o_items = _mean([r["item_count"] for r in oh]) if oh else 0.0
+            avg_o_sellers = _mean([r["seller_count"] for r in oh]) if oh else 0.0
+            g_items = oldest_rec["item_count"] / avg_o_items if avg_o_items > 0 else 1.0
+            g_sellers = oldest_rec["seller_count"] / avg_o_sellers if avg_o_sellers > 0 else 1.0
+            oldest_scores.append(
+                (g_items * WEIGHT_ITEMS + g_sellers * WEIGHT_SELLERS) * INDEX_SCALE
+            )
+
+        if oldest_scores:
+            oldest_index = round(min(_mean(oldest_scores), INDEX_MAX), 2)
+            week_delta = round(final_index - oldest_index, 2)
+
+    logger.info(
+        "Index computed for %s: %.2f (%s), week_delta=%.2f, warming_up=%s",
+        today,
+        final_index,
+        get_status(final_index),
+        week_delta,
+        warming_up,
+    )
+
+    # Compute daily_rankings: today vs yesterday item_count for each keyword.
+    # Only keywords present both today and yesterday are included.
+    yesterday = (date.fromisoformat(today) - timedelta(days=1)).isoformat()
+    yesterday_by_kw: dict[str, CrawlRecord] = {
+        r["keyword"]: r for r in records if r["date"] == yesterday
+    }
+    daily_rankings: list[DailyRankingEntry] = []
+    for kw in active_keywords:
+        today_rec = today_by_kw.get(kw)
+        yest_rec = yesterday_by_kw.get(kw)
+        if today_rec is None:
+            continue
+        today_count = today_rec["item_count"]
+        if yest_rec is not None and yest_rec["item_count"] > 0:
+            delta = today_count - yest_rec["item_count"]
+            pct = delta / yest_rec["item_count"]
+        else:
+            delta = 0
+            pct = 0.0
+        daily_rankings.append(DailyRankingEntry(keyword=kw, delta=delta, pct=round(pct, 4)))
+    daily_rankings.sort(key=lambda e: e["pct"], reverse=True)
+
+    return AnalysisResult(
+        date=today,
+        index=final_index,
+        status=get_status(final_index),
+        rankings=rankings,
+        daily_rankings=daily_rankings,
+        warming_up=warming_up,
+        week_delta=week_delta,
+    )
+
+
+# ---------------------------------------------------------------------------
+# Convenience entry point (used by run_daily.py)
+# ---------------------------------------------------------------------------
+
+
+def analyze(target_date: str) -> AnalysisResult:
+    """Load records and compute the index for target_date in one call.
+
+    Args:
+        target_date: Date string "YYYY-MM-DD".
+
+    Returns:
+        AnalysisResult dict.
+    """
+    records = get_records(target_date)
+    return compute_index(records, target_date)

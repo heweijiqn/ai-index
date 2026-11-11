@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=1080" />
+<style>{{ inlined_css }}</style>
+</head>
+<body class="card-root">
+
+  <!-- radial glow behind gauge -->
+  <div class="bg-glow" style="background: {{ accent_color }};"></div>
+
+  <div class="card">
+
+    <!-- ── HEADER ── -->
+    <header class="header">
+      <div>
+        <p class="brand-name">AI 铲子指数（AI SHOVEL INDEX）</p>
+        <p class="brand-date">{{ date }}</p>
+      </div>
+      <div class="status-pill"
+           style="border-color: {{ accent_color }}40; background: {{ accent_color }}0f;">
+        <span class="status-dot" style="background: {{ accent_color }};"></span>
+        <span class="status-text" style="color: {{ accent_color }};">{{ status_raw }}</span>
+      </div>
+    </header>
+
+    <!-- ── GAUGE ── -->
+    <!--
+      SVG layout:
+        viewBox 0 0 1080 490
+        centre cx=540, cy=460  (circle sits at very bottom of SVG so top half is visible)
+        radius  r=220
+        The semicircle path goes from (320, 460) [left] across the top to (760, 460) [right].
+        Path: M 320 460  A 220 220 0 0 1 760 460
+        For stroke-dasharray / dashoffset we use the arc length = π * r ≈ 691.15
+        dashoffset = circumference * (1 - index/100)   → computed in renderer.py
+    -->
+    <section class="gauge-section">
+      <svg class="gauge-svg"
+           width="1080" height="490"
+           viewBox="0 0 1080 490"
+           xmlns="http://www.w3.org/2000/svg">
+
+        <!-- track: full semicircle -->
+        <path class="gauge-track"
+              d="M 320 460 A 220 220 0 0 1 760 460"
+              pathLength="{{ gauge_circumference }}" />
+
+        <!-- fill: accent-coloured arc, length driven by score -->
+        <path class="gauge-fill"
+              d="M 320 460 A 220 220 0 0 1 760 460"
+              stroke="{{ accent_color }}"
+              pathLength="{{ gauge_circumference }}"
+              stroke-dasharray="{{ gauge_circumference }}"
+              stroke-dashoffset="{{ arc_offset }}" />
+
+        <!-- score number -->
+        <text class="gauge-number" x="540" y="390">{{ index_int }}</text>
+
+        <!-- / 100 -->
+        <text class="gauge-denom" x="540" y="430" style="fill: {{ accent_color }};">&thinsp;/ 100</text>
+
+        <!-- phase label -->
+        <text class="gauge-phase" x="540" y="462">{{ phase_label }}</text>
+
+      </svg>
+
+      {% if warming_up %}
+      <p class="warming-note">&#9432; warming up — fewer than 7 days of data</p>
+      {% endif %}
+    </section>
+
+    <!-- ── DIVIDER ── -->
+    <div class="divider"></div>
+
+    <!-- ── KEYWORD LIST ── -->
+    <section class="keywords-section">
+
+      {% if drivers %}
+      <p class="kw-group-label">Top Drivers</p>
+      <ul class="kw-list">
+        {% for entry in drivers %}
+        <li class="kw-row">
+          <div class="kw-meta">
+            <span class="kw-name">{{ entry.keyword }}</span>
+            <span class="kw-pct" style="color: {{ accent_color }};">{{ entry.pct_str }}</span>
+          </div>
+          <div class="bar-track">
+            <div class="bar-fill"
+                 style="width: {{ entry.bar_pct }}%; background: {{ accent_color }};"></div>
+          </div>
+        </li>
+        {% endfor %}
+      </ul>
+      {% endif %}
+
+      {% if cooling %}
+      <p class="kw-group-label kw-cooling-label">Cooling</p>
+      <ul class="kw-list">
+        {% for entry in cooling %}
+        <li class="kw-row">
+          <div class="kw-meta">
+            <span class="kw-name">{{ entry.keyword }}</span>
+            <span class="kw-pct kw-negative">{{ entry.pct_str }}</span>
+          </div>
+          <div class="bar-track">
+            <div class="bar-fill bar-negative" style="width: {{ entry.bar_pct }}%;"></div>
+          </div>
+        </li>
+        {% endfor %}
+      </ul>
+      {% endif %}
+
+    </section>
+
+    <!-- ── FOOTER ── -->
+    <footer class="footer">
+      <p class="footer-tagline">Tracking AI speculation via tutorial demand</p>
+      <p class="footer-domain">yoyoo.ai</p>
+    </footer>
+
+  </div>
+
+</body>
+</html>

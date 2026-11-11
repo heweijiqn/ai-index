@@ -1,0 +1,42 @@
+name: Checks and smoke test
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - name: Create environment and install dependencies
+        run: |
+          python -m venv .venv
+          .venv/bin/python3 -m pip install -r requirements.txt
+          .venv/bin/python3 -m playwright install --with-deps chromium
+      - name: Check formatting, lint and types
+        run: |
+          .venv/bin/python3 -m black . --line-length 100 --check
+          .venv/bin/python3 -m ruff check .
+          .venv/bin/python3 -m mypy . --ignore-missing-imports
+      - name: Run regression tests
+        run: .venv/bin/python3 -m pytest tests -q
+      - name: Render sample cards
+        run: .venv/bin/python3 smoke_test.py
+      - name: Upload sample outputs
+        uses: actions/upload-artifact@v4
+        with:
+          name: sample-cards
+          path: output/smoke/
+          retention-days: 14

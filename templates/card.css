@@ -1,0 +1,283 @@
+/* templates/card.css — Tailwind source for AI Shovel Index card.
+   Build: npx tailwindcss -i templates/card.css -o templates/card.compiled.css --minify
+   Style: Stripe / Linear dark gradient — SVG semicircle gauge + keyword list
+*/
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+}
+
+@layer components {
+
+  /* ── ROOT ──────────────────────────────────────────────────── */
+  .card-root {
+    width: 1080px;
+    height: 1080px;
+    overflow: hidden;
+    background: #0d0d0d;
+    color: #ffffff;
+    font-family: -apple-system, "SF Pro Display", "PingFang SC",
+                 "Helvetica Neue", "Microsoft YaHei", sans-serif;
+    -webkit-font-smoothing: antialiased;
+    position: relative;
+  }
+
+  /* subtle radial glow behind the gauge — colour injected via inline style */
+  .bg-glow {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 900px;
+    height: 640px;
+    pointer-events: none;
+    z-index: 0;
+    border-radius: 50%;
+    filter: blur(120px);
+    opacity: 0.13;
+  }
+
+  /* ── OUTER CARD FRAME ───────────────────────────────────────── */
+  .card {
+    position: relative;
+    z-index: 1;
+    width: 1080px;
+    height: 1080px;
+    display: flex;
+    flex-direction: column;
+    padding: 52px 64px 44px;
+  }
+
+  /* ── HEADER ─────────────────────────────────────────────────── */
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-shrink: 0;
+  }
+
+  .brand-name {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.3);
+  }
+
+  .brand-date {
+    font-size: 13px;
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    color: rgba(255,255,255,0.32);
+    margin-top: 5px;
+    letter-spacing: 0.06em;
+  }
+
+  .status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 7px 16px 7px 12px;
+    border-radius: 100px;
+    border: 1px solid;
+  }
+
+  .status-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .status-text {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+  }
+
+  /* ── GAUGE SECTION ───────────────────────────────────────────── */
+  .gauge-section {
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 4px;
+  }
+
+  .gauge-svg {
+    display: block;
+    overflow: visible;
+  }
+
+  /* track arc — grey background ring */
+  .gauge-track {
+    fill: none;
+    stroke: rgba(255,255,255,0.07);
+    stroke-width: 22;
+    stroke-linecap: round;
+  }
+
+  /* fill arc — position set by stroke-dashoffset */
+  .gauge-fill {
+    fill: none;
+    stroke-width: 22;
+    stroke-linecap: round;
+  }
+
+  /* score number */
+  .gauge-number {
+    font-size: 110px;
+    font-weight: 800;
+    fill: #ffffff;
+    text-anchor: middle;
+    dominant-baseline: central;
+    letter-spacing: -0.04em;
+    font-family: -apple-system, "SF Pro Display", "Helvetica Neue", sans-serif;
+  }
+
+  .gauge-denom {
+    font-size: 22px;
+    font-weight: 400;
+    text-anchor: middle;
+    dominant-baseline: central;
+    letter-spacing: 0.04em;
+    opacity: 0.65;
+    font-family: -apple-system, "SF Pro Display", "Helvetica Neue", sans-serif;
+  }
+
+  .gauge-phase {
+    font-size: 15px;
+    font-weight: 500;
+    fill: rgba(255,255,255,0.38);
+    text-anchor: middle;
+    dominant-baseline: central;
+    letter-spacing: 0.06em;
+    font-family: -apple-system, "SF Pro Display", "Helvetica Neue", sans-serif;
+  }
+
+  .warming-note {
+    font-size: 11px;
+    color: rgba(255,255,255,0.2);
+    letter-spacing: 0.04em;
+    margin-top: 4px;
+    text-align: center;
+  }
+
+  /* ── DIVIDER ─────────────────────────────────────────────────── */
+  .divider {
+    width: 100%;
+    height: 1px;
+    background: rgba(255,255,255,0.07);
+    margin: 16px 0 22px;
+    flex-shrink: 0;
+  }
+
+  /* ── KEYWORD SECTION ─────────────────────────────────────────── */
+  .keywords-section {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+
+  .kw-group-label {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.2);
+    margin-bottom: 12px;
+  }
+
+  .kw-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 13px;
+  }
+
+  .kw-cooling-label {
+    margin-top: 20px;
+  }
+
+  .kw-row {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .kw-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+  }
+
+  .kw-name {
+    font-size: 15px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.8);
+    letter-spacing: 0.01em;
+  }
+
+  .kw-pct {
+    font-size: 14px;
+    font-weight: 700;
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.02em;
+    flex-shrink: 0;
+  }
+
+  .kw-negative { color: #ff453a; }
+
+  /* bar */
+  .bar-track {
+    width: 100%;
+    height: 2px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 2px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .bar-fill {
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    border-radius: 2px;
+    opacity: 0.55;
+  }
+
+  .bar-negative { background: #ff453a !important; }
+
+  /* ── FOOTER ─────────────────────────────────────────────────── */
+  .footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    flex-shrink: 0;
+    margin-top: 16px;
+  }
+
+  .footer-tagline {
+    font-size: 10px;
+    color: rgba(255,255,255,0.14);
+    letter-spacing: 0.05em;
+    line-height: 1.6;
+  }
+
+  .footer-domain {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    color: rgba(255,255,255,0.16);
+    text-transform: lowercase;
+  }
+}
