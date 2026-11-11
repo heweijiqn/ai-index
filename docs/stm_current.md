@@ -137,10 +137,11 @@ then commit and push the verified change to the existing GitHub repository.
 - [x] Limit each run's analysis to its requested keywords while preserving other same-date history
 - [x] Update README, Windows usage guides, architecture and data report wording for configurable sampling
 - [x] Verify input validation, deduplication, pagination, early exhaustion and pipeline forwarding; run project checks
-- [ ] Commit and push the verified changes, then confirm the remote revision
+- [x] Commit and push the verified changes, then confirm the remote revision
 
 Validation on 2026-11-11: all 120 tests passed, including Chromium-backed
 pagination past two pages, exact item limits, duplicate handling and early search
 exhaustion. Whole-repository Black/Ruff/mypy checks passed. A live read-only
 `crawler.py --keyword "AI 副业" --limit 3 --dry-run` returned exactly three items,
 three sellers and an average price of 1.19; no history documents were changed.
+Feature commit `fb9ea8a` was pushed to origin/main and verified with ls-remote.
