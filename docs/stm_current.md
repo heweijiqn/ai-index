@@ -238,3 +238,10 @@ source, public docs or release metadata. Public main is the new root commit
 GitHub clone confirmed one reachable commit, those four files and the package hash.
 The original source checkout remains usable, with direct origin pushes disabled;
 only the isolated public-distribution checkout should publish future packages.
+
+## Restore Normal Source Publication And QQ Community
+
+- [x] Back up the current local source and remote encrypted-publication history before restoring publication
+- [x] Restore source-publication architecture, add QQ group 1056531741 to README and Windows guides, and preserve the user's four README screenshots
+- [x] Verify source/document completeness, privacy exclusions and links; restore direct source pushes and retire the encrypted publishing checkout
+- [ ] Publish the complete source with an exact remote lease, verify GitHub files/revision and record delivery

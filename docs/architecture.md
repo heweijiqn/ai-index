@@ -109,8 +109,8 @@ maintainer is 小鱼鱼, configurable through AI_INDEX_AUTHOR for both web and
 output signatures. Existing repository paths, service unit identifiers and
 AI_INDEX_* environment names are retained for installation compatibility. The GitHub
 repository is https://github.com/heweijiqn/ai-index, maintained as a standalone
-public repository. Public main now delivers encrypted releases; the complete
-development history remains in the local source checkout and verified backups.
+public repository. Public main contains the maintained plaintext source and
+documentation; development history and earlier release backups are retained.
 
 ## Local Web Workbench
 
@@ -140,26 +140,20 @@ serves browser profiles, arbitrary local paths or raw browser responses. Only on
 web job runs at a time; do not run CLI/login tasks against the same profile while
 a web crawl is active. No Node build or new Python dependency is required.
 
-## Encrypted Public Distribution
+## Source Publication And Community
 
-The full plaintext project remains in the owner's local checkout. Public delivery
-uses a separate repository checkout containing only README, LICENSE, a password-
-protected 7z source package and SHA256SUMS. The package includes all maintained
-source, launchers and documentation needed to install and run the project. It
-excludes .git, credentials, browser sessions, personal history/output and installed
-environments. The 7z package uses AES encryption with encrypted filenames.
+The public repository distributes complete plaintext source, launchers, tests and
+documentation. Users install dependencies and sign in with their own browser
+session; no archive password, activation file or group membership is required.
+README and Windows guides list QQ group 1056531741 for optional discussion and
+feedback. The personal non-commercial self-use license continues to apply.
 
-Before replacing the public main history, preserve the complete Git history and
-a local workspace/data backup outside the checkout, and verify restoration. The
-public distribution starts with a fresh root commit, so its normal branch history
-does not include earlier plaintext source. Existing external clones, forks and
-hosting caches cannot be recalled by this operation.
-
-Publish only from the isolated distribution checkout. Direct pushes from the full
-source checkout are disabled to prevent accidental plaintext publication. Future
-updates must rebuild, verify and publish the encrypted package through that
-checkout. The password is supplied separately by the owner and is never committed,
-stored in release metadata or included in the public documentation.
+Publish normal source commits directly from this checkout to origin/main. The
+temporary encrypted-only publishing checkout is retired; its archive, Git history
+and verified private workspace/data backups remain local for recovery. Browser
+profiles, account credentials, personal history/output and installed environments
+remain excluded from publication. The user's four public README screenshots are
+preserved when restoring the full installation and usage instructions.
 
 ## Templates And Deployment
 

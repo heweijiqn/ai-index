@@ -4,6 +4,8 @@
 
 维护者：[hwj](https://github.com/heweijiqn) · [项目仓库](https://github.com/heweijiqn/ai-index)
 
+**QQ 交流群：1056531741**（使用交流与问题反馈）。源码可直接下载、安装和运行，加群不是运行条件，也不需要解压密码或激活授权。
+
 **使用许可：仅限个人非商业自用。** 允许本人学习、私下运行和修改；禁止商用、组织/工作用途、为他人提供服务及未经授权的再分发。完整条款见 [LICENSE](LICENSE)。本项目以自定义的源码可见许可发布，不属于 OSI 定义的开源软件。
 
 ## 能做什么
@@ -16,6 +18,16 @@
 - 生成 3 张 **1080 × 1080 PNG** 和 `post.txt` 发布文案，名称统一为 **热卖指数**，默认署名 **小鱼鱼**。
 - **每次运行新建结果文件夹**，同一天重复运行也会保留之前的结果。
 - 登录失效、访问受限或解析异常时明确报错，避免用失败数据生成指数。
+
+## 界面预览
+
+<img width="2874" height="1634" alt="image" src="https://github.com/user-attachments/assets/61aa0754-4791-4036-a486-f6cbee7c833d" />
+
+<img width="2878" height="1506" alt="image" src="https://github.com/user-attachments/assets/6b319d25-231e-4fa7-95e5-f559c1ffa5a2" />
+
+<img width="2842" height="1340" alt="image" src="https://github.com/user-attachments/assets/182940ab-723b-40ec-ad52-13e856494d52" />
+
+<img width="2870" height="1536" alt="image" src="https://github.com/user-attachments/assets/f86b7b2f-523f-41a5-8628-9fd432f2a978" />
 
 ## 已配置好的本机
 
