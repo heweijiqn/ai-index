@@ -221,7 +221,20 @@ The remote README maintainer edit was preserved during rebase.
 ## Encrypted Distribution And Public Source Removal
 
 - [x] Back up and verify all Git history plus local project/data outside the source checkout
-- [ ] Create and verify a password-protected 7z containing the complete distributable project, excluding personal data, credentials and machine-specific environments
-- [ ] Prepare a separate public checkout with only release instructions, license, encrypted package and checksum, with a fresh root history
-- [ ] Push the verified public-only revision with an exact lease, confirm remote files/history and preserve source locally
-- [ ] Disable direct plaintext source pushes and document the backup and encrypted release workflow
+- [x] Create and verify a password-protected 7z containing the complete distributable project, excluding personal data, credentials and machine-specific environments
+- [x] Prepare a separate public checkout with only release instructions, license, encrypted package and checksum, with a fresh root history
+- [x] Push the verified public-only revision with an exact lease, confirm remote files/history and preserve source locally
+- [x] Disable direct plaintext source pushes and document the backup and encrypted release workflow
+
+Completed on 2026-11-12. Verified backups are under
+`D:/ai-index-backups/2026-11-12_102756/`: complete Git bundle with restored-object
+checks plus a CRC-verified workspace/local-data ZIP containing 1,068 files (only
+rebuildable environments, browser binaries and caches excluded). The encrypted
+release contains 68 distributable files, uses 7zAES with encrypted headers, and
+passed a full correct-password extraction with per-file SHA-256 comparison.
+Missing/wrong passwords cannot list filenames. Password material is not stored in
+source, public docs or release metadata. Public main is the new root commit
+`fd1c08f`, containing only README, LICENSE, SHA256SUMS and the 7z package; a fresh
+GitHub clone confirmed one reachable commit, those four files and the package hash.
+The original source checkout remains usable, with direct origin pushes disabled;
+only the isolated public-distribution checkout should publish future packages.
