@@ -244,4 +244,14 @@ only the isolated public-distribution checkout should publish future packages.
 - [x] Back up the current local source and remote encrypted-publication history before restoring publication
 - [x] Restore source-publication architecture, add QQ group 1056531741 to README and Windows guides, and preserve the user's four README screenshots
 - [x] Verify source/document completeness, privacy exclusions and links; restore direct source pushes and retire the encrypted publishing checkout
-- [ ] Publish the complete source with an exact remote lease, verify GitHub files/revision and record delivery
+- [x] Publish the complete source with an exact remote lease, verify GitHub files/revision and record delivery
+
+Completed on 2026-11-12: source publication was restored at `b6f44c2` with an exact
+lease against the encrypted-publication head. A fresh GitHub clone verified all
+67 maintained source/document files, QQ group 1056531741 and the user's four
+screenshots. The encrypted package and SHA256SUMS are absent from public main.
+Current source/remote history was backed up under the source-restoration folder
+inside `D:/ai-index-backups/2026-11-12_102756/`. Normal origin pushes/tracking are
+restored; the former encrypted publishing checkout is retired. Existing private
+backups and archives remain intact. Runtime code and the self-use license were
+unchanged; document links, privacy exclusions and source completeness passed.
