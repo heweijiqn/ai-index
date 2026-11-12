@@ -3,6 +3,11 @@
 This directory packages the project for the optimized VPS path:
 Ubuntu VPS + Docker Compose + systemd timer.
 
+Use this deployment only for your own personal, non-commercial use under
+[LICENSE](../../LICENSE). Organizational/work use and services for other people,
+whether paid or free, are not authorized. Third-party components retain their
+own licenses.
+
 ## Why This Variant
 
 - app runtime is isolated inside an image

@@ -3,6 +3,10 @@
 This directory contains a concrete deployment path for the recommended target:
 Ubuntu VPS + systemd timer.
 
+Use this deployment only for your own personal, non-commercial use under
+[LICENSE](../../LICENSE). Organizational/work use and services for other people,
+whether paid or free, are not authorized.
+
 ## Files
 
 - `bootstrap_ubuntu.sh`: base server bootstrap for Ubuntu

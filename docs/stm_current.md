@@ -201,3 +201,17 @@ updated caption hashtags. Current usage guides, README, architecture and product
 vision use the new product/display names. Existing run snapshots stay immutable.
 Naming and documentation commit `a3fe073` was pushed to origin/main and its full
 revision was verified with ls-remote.
+
+## Personal Non-Commercial Use License
+
+- [x] Add a root LICENSE granting natural persons private, non-commercial self-use and modification; prohibit commercial/organizational use, services for others and unauthorized redistribution, while preserving third-party/platform/statutory rights
+- [x] Synchronize README, usage/deployment guides, product scope and package/root lock metadata with the custom source-available license
+- [x] Validate license links, JSON metadata, scope consistency and unchanged third-party notices
+- [ ] Commit and push the licensing/documentation changes, then verify origin/main
+
+Validation on 2026-11-12: LICENSE scope, six guide links/code fences, package JSON
+and matching root lock metadata passed. Dependency metadata and bundled Tailwind
+MIT content/notices are unchanged. Application code was not modified, so runtime
+tests were not rerun. The license preserves third-party, statutory, hosting-platform
+and previously valid license rights; it is explicitly source-available rather than
+OSI open source.

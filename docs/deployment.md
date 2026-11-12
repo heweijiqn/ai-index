@@ -6,6 +6,11 @@ keywords. The web profile and generated signatures default to 小鱼鱼;
 ai-shovel-index service/directory identifiers and AI_INDEX_* variables remain
 compatible with installed deployments.
 
+All deployment examples are for a natural person's private, non-commercial
+self-use under [LICENSE](../LICENSE). They do not authorize organizational/work
+use, commercial deployment or providing a website/API/service to other people,
+even for free. Third-party dependencies retain their own licenses.
+
 ## Current Storage And Outputs
 
 Normal runs use ordinary documents. Read daily data in

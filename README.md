@@ -4,6 +4,8 @@
 
 维护者：[hwj](https://github.com/heweijiqn) · [项目仓库](https://github.com/heweijiqn/ai-index)
 
+**使用许可：仅限个人非商业自用。** 允许本人学习、私下运行和修改；禁止商用、组织/工作用途、为他人提供服务及未经授权的再分发。完整条款见 [LICENSE](LICENSE)。本项目以自定义的源码可见许可发布，不属于 OSI 定义的开源软件。
+
 ## 能做什么
 
 - 使用本地浏览器登录会话抓取手动输入的关键词，自行指定每个关键词的商品采样上限。
@@ -181,3 +183,4 @@ GitHub Actions 运行代码检查、回归测试和样例渲染。真实商品�
 - [部署说明](docs/deployment.md)：Windows、VPS 和 Docker 运行条件。
 - [项目架构](docs/architecture.md)：抓取、文档存储、分析与渲染的数据流。
 - [开发约定](AGENTS.md)：项目命令、代码规范与任务范围。
+- [使用许可](LICENSE)：个人非商业自用的授权范围与限制，第三方内容保留原有许可。
