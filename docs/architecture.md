@@ -109,9 +109,8 @@ maintainer is 小鱼鱼, configurable through AI_INDEX_AUTHOR for both web and
 output signatures. Existing repository paths, service unit identifiers and
 AI_INDEX_* environment names are retained for installation compatibility. The GitHub
 repository is https://github.com/heweijiqn/ai-index, maintained as a standalone
-public repository. The public main branch starts with a maintained snapshot
-submitted by hwj. Earlier development history is retained in local and archived
-repository backups.
+public repository. Public main now delivers encrypted releases; the complete
+development history remains in the local source checkout and verified backups.
 
 ## Local Web Workbench
 
@@ -140,6 +139,27 @@ creation. File downloads are limited to known artifacts under output/. It never
 serves browser profiles, arbitrary local paths or raw browser responses. Only one
 web job runs at a time; do not run CLI/login tasks against the same profile while
 a web crawl is active. No Node build or new Python dependency is required.
+
+## Encrypted Public Distribution
+
+The full plaintext project remains in the owner's local checkout. Public delivery
+uses a separate repository checkout containing only README, LICENSE, a password-
+protected 7z source package and SHA256SUMS. The package includes all maintained
+source, launchers and documentation needed to install and run the project. It
+excludes .git, credentials, browser sessions, personal history/output and installed
+environments. The 7z package uses AES encryption with encrypted filenames.
+
+Before replacing the public main history, preserve the complete Git history and
+a local workspace/data backup outside the checkout, and verify restoration. The
+public distribution starts with a fresh root commit, so its normal branch history
+does not include earlier plaintext source. Existing external clones, forks and
+hosting caches cannot be recalled by this operation.
+
+Publish only from the isolated distribution checkout. Direct pushes from the full
+source checkout are disabled to prevent accidental plaintext publication. Future
+updates must rebuild, verify and publish the encrypted package through that
+checkout. The password is supplied separately by the owner and is never committed,
+stored in release metadata or included in the public documentation.
 
 ## Templates And Deployment
 

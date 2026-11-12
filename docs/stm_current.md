@@ -217,3 +217,11 @@ and previously valid license rights; it is explicitly source-available rather th
 OSI open source.
 Licensing commit `28a9db7` was pushed and its revision verified on origin/main.
 The remote README maintainer edit was preserved during rebase.
+
+## Encrypted Distribution And Public Source Removal
+
+- [x] Back up and verify all Git history plus local project/data outside the source checkout
+- [ ] Create and verify a password-protected 7z containing the complete distributable project, excluding personal data, credentials and machine-specific environments
+- [ ] Prepare a separate public checkout with only release instructions, license, encrypted package and checksum, with a fresh root history
+- [ ] Push the verified public-only revision with an exact lease, confirm remote files/history and preserve source locally
+- [ ] Disable direct plaintext source pushes and document the backup and encrypted release workflow
